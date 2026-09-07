@@ -63,93 +63,68 @@ const ServicesPage = () => {
 
       {/* Services List - Whole Card Clickable */}
       {isLoading ? (
-        <ShimmerList count={4} />
+        <ShimmerList count={6} />
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {data?.services?.map((service) => {
             const Icon = getServiceIcon(service.category);
+            const lowestPrice = service.pricingTiers?.length
+              ? Math.min(...service.pricingTiers.map((t) => t.price))
+              : (service.price || 0);
 
             return (
               <Link
                 key={service._id}
                 to={`/services/${service._id}`}
-                className="group relative block rounded-3xl p-6 sm:p-8 bg-white dark:bg-obsidian-900 border border-slate-200/80 dark:border-white/10 hover:border-brand-500/80 dark:hover:border-brand-500/80 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 cursor-pointer flex flex-col justify-between"
+                className="group relative rounded-3xl p-5 sm:p-6 bg-white dark:bg-obsidian-900 border border-slate-200/80 dark:border-white/10 hover:border-brand-500/80 dark:hover:border-brand-500/80 transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer flex flex-col justify-between"
               >
-                <div className="space-y-5">
+                <div className="space-y-4">
                   {/* Top row */}
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-2xl bg-brand-500/10 text-brand-600 dark:text-brand-400 flex items-center justify-center group-hover:scale-105 transition-transform">
-                        <Icon className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                          {service.category}
-                        </span>
-                        <h3 className="text-xl font-bold font-display text-slate-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
-                          {service.title}
-                        </h3>
-                      </div>
+                    <div className="w-11 h-11 rounded-2xl bg-brand-500/10 text-brand-600 dark:text-brand-400 flex items-center justify-center group-hover:scale-105 transition-transform">
+                      <Icon className="w-5 h-5" />
                     </div>
                     <span className="text-xs font-bold px-3 py-1 rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-400">
-                      {service.tag}
+                      {service.tag || service.category}
                     </span>
                   </div>
 
-                  {/* 1-Line Clean Summary */}
-                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 line-clamp-1">
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                      {service.category}
+                    </span>
+                    <h3 className="text-base sm:text-lg font-bold font-display text-slate-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors line-clamp-1">
+                      {service.title}
+                    </h3>
+                  </div>
+
+                  {/* Clean Summary */}
+                  <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
                     {service.shortDesc || service.description}
                   </p>
-
-                  {/* Tier Comparison Mini Grid without silver highlights */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {service.pricingTiers.map((tier, idx) => (
-                      <div
-                        key={idx}
-                        className={`p-4 rounded-2xl border transition-all ${
-                          tier.isPopular
-                            ? 'bg-brand-500/10 border-brand-500/50 dark:bg-brand-950/40 text-brand-600 dark:text-brand-300 shadow-sm'
-                            : 'bg-slate-50 dark:bg-obsidian-850 border-slate-200/60 dark:border-white/5'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-xs font-bold text-slate-900 dark:text-white">
-                            {tier.tierName}
-                          </span>
-                          {tier.isPopular && (
-                            <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-brand-600 text-white">
-                              Popular
-                            </span>
-                          )}
-                        </div>
-                        <div className="text-lg font-black font-display text-slate-900 dark:text-white mb-2">
-                          {formatAmount(tier.price)}
-                        </div>
-                        <ul className="space-y-1.5 text-[11px] text-slate-500 dark:text-slate-400">
-                          {tier.features.slice(0, 2).map((f, i) => (
-                            <li key={i} className="flex items-center gap-1.5">
-                              <Check className="w-3 h-3 text-emerald-500 shrink-0" />
-                              <span className="truncate">{f}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    ))}
-                  </div>
                 </div>
 
-                {/* Bottom CTA */}
-                <div className="pt-5 mt-5 border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
-                  <div className="flex items-center gap-1 text-xs text-slate-500">
-                    <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
-                    <span className="font-bold text-slate-900 dark:text-white">{service.rating}</span>
-                    <span>({service.completedProjects}+ Completed)</span>
+                {/* Bottom section with starting price & CTA */}
+                <div className="pt-4 mt-5 border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
+                  <div>
+                    <span className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                      Starting at
+                    </span>
+                    <span className="text-base font-black font-display text-slate-900 dark:text-white">
+                      {formatAmount(lowestPrice)}
+                    </span>
                   </div>
 
-                  <span className="flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-slate-900 group-hover:bg-brand-600 dark:bg-white dark:group-hover:bg-brand-400 text-white dark:text-slate-950 dark:group-hover:text-white text-xs font-bold transition-all shadow-sm">
-                    <span>Select Package</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <div className="hidden sm:flex items-center gap-1 text-[11px] text-slate-500 mr-1">
+                      <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                      <span className="font-bold text-slate-900 dark:text-white">{service.rating}</span>
+                    </div>
+                    <span className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-slate-900 group-hover:bg-brand-600 dark:bg-white dark:group-hover:bg-brand-400 text-white dark:text-slate-950 dark:group-hover:text-white text-xs font-bold transition-all shadow-sm">
+                      <span>Details</span>
+                      <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
+                    </span>
+                  </div>
                 </div>
               </Link>
             );

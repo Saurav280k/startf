@@ -46,9 +46,6 @@ const MyOrdersPage = () => {
         <h1 className="text-3xl font-black font-display text-slate-900 dark:text-white">
           My Purchases & Orders
         </h1>
-        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-xl leading-relaxed">
-          Track real-time account transfer progress, UPI verification status, and view order receipts.
-        </p>
       </div>
 
       {/* Guest Email Lookup Bar if not logged in */}

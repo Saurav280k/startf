@@ -197,7 +197,7 @@ const HomePage = () => {
         <div className="rounded-3xl p-8 bg-slate-50 dark:bg-obsidian-900/60 border border-slate-200/80 dark:border-white/5 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
           <div>
             <div className="text-3xl sm:text-4xl font-black font-display text-brand-600 dark:text-brand-400">
-              {currency === 'USD' ? '$580K+' : '₹4.8 Cr+'}
+              {currency === 'USD' ? '$5080+' : '₹4.8 Lakh+'}
             </div>
             <div className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-1">
               Safe Transactions Volume
@@ -283,53 +283,53 @@ const HomePage = () => {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {servicesData?.services?.slice(0, 2).map((srv) => (
-            <Link
-              key={srv._id}
-              to={`/services/${srv._id}`}
-              className="group rounded-3xl p-6 bg-white dark:bg-obsidian-900/80 border border-slate-200/80 dark:border-white/10 hover:border-brand-500/80 transition-all duration-300 flex flex-col justify-between hover:shadow-xl hover:-translate-y-0.5 cursor-pointer"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-xs font-bold px-3 py-1 rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-400">
-                    {srv.category}
-                  </span>
-                  <span className="text-xs text-slate-500 font-medium">
-                    ⭐ {srv.rating} ({srv.completedProjects} delivered)
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {servicesData?.services?.slice(0, 2).map((srv) => {
+            const lowestPrice = srv.pricingTiers?.length
+              ? Math.min(...srv.pricingTiers.map((t) => t.price))
+              : (srv.price || 0);
+
+            return (
+              <Link
+                key={srv._id}
+                to={`/services/${srv._id}`}
+                className="group rounded-3xl p-5 sm:p-6 bg-white dark:bg-obsidian-900/80 border border-slate-200/80 dark:border-white/10 hover:border-brand-500/80 transition-all duration-300 flex flex-col justify-between hover:shadow-xl hover:-translate-y-0.5 cursor-pointer"
+              >
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold px-3 py-1 rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-400">
+                      {srv.category}
+                    </span>
+                    <span className="text-xs text-slate-500 font-medium">
+                      ⭐ {srv.rating} ({srv.completedProjects} delivered)
+                    </span>
+                  </div>
+                  <h3 className="text-lg font-bold font-display text-slate-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors line-clamp-1">
+                    {srv.title}
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                    {srv.shortDesc || srv.description}
+                  </p>
+                </div>
+
+                <div className="pt-4 mt-5 border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
+                  <div>
+                    <span className="block text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                      Starting at
+                    </span>
+                    <span className="text-base font-black font-display text-slate-900 dark:text-white">
+                      {formatAmount(lowestPrice)}
+                    </span>
+                  </div>
+
+                  <span className="flex items-center gap-1 px-3.5 py-2 rounded-xl bg-slate-900 group-hover:bg-brand-600 dark:bg-white dark:group-hover:bg-brand-500 text-white dark:text-slate-950 dark:group-hover:text-white text-xs font-bold transition-all shadow-sm">
+                    <span>View Details</span>
+                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                   </span>
                 </div>
-                <h3 className="text-xl font-bold font-display text-slate-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors mb-2">
-                  {srv.title}
-                </h3>
-                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mb-6 line-clamp-1">
-                  {srv.shortDesc}
-                </p>
-
-                {/* Tiers preview */}
-                <div className="space-y-2 mb-6">
-                  {srv.pricingTiers?.slice(0, 2).map((tier, idx) => (
-                    <div
-                      key={idx}
-                      className="p-3 rounded-2xl bg-slate-50 dark:bg-obsidian-850 flex items-center justify-between text-xs"
-                    >
-                      <span className="font-semibold text-slate-700 dark:text-slate-300">
-                        {tier.tierName}
-                      </span>
-                      <span className="font-bold text-slate-900 dark:text-white">
-                        From {formatAmount(tier.price)}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="w-full py-3 rounded-2xl bg-slate-900 group-hover:bg-brand-600 dark:bg-white dark:group-hover:bg-brand-500 text-white dark:text-slate-950 dark:group-hover:text-white text-xs font-bold text-center transition-all flex items-center justify-center gap-2">
-                <span>View Details & Packages</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </div>
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       </section>
 

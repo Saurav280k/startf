@@ -8,11 +8,11 @@ const Toast = () => {
   if (toasts.length === 0) return null;
 
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 md:left-auto md:right-6 md:translate-x-0 z-50 flex flex-col gap-2.5 max-w-sm w-full px-4 md:px-0 pointer-events-none">
+    <div className="fixed top-6 left-1/2 -translate-x-1/2 md:left-auto md:right-6 md:translate-x-0 z-[9999] flex flex-col gap-2.5 max-w-sm w-full px-4 md:px-0 pointer-events-none">
       {toasts.map((toast) => (
         <div
           key={toast.id}
-          className="pointer-events-auto flex items-center justify-between p-4 rounded-2xl glass-panel shadow-xl border border-slate-200/80 dark:border-white/10 bg-white/95 dark:bg-obsidian-900/95 text-slate-800 dark:text-slate-100 transition-all duration-300 animate-in slide-in-from-bottom-3"
+          className="pointer-events-auto flex items-center justify-between p-4 rounded-2xl glass-panel shadow-2xl border border-slate-200/80 dark:border-white/10 bg-white/95 dark:bg-obsidian-900/95 text-slate-800 dark:text-slate-100 transition-all duration-300 animate-in slide-in-from-top-3"
         >
           <div className="flex items-center gap-3">
             {toast.type === 'success' && (

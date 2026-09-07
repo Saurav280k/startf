@@ -446,11 +446,7 @@ const ProfilePage = () => {
               </button>
             </div>
           </form>
-        ) : (
-          <p className="text-xs text-slate-500 dark:text-slate-400">
-            Click "Change Password" to update your account password directly without email confirmations.
-          </p>
-        )}
+        ) : null}
       </div>
 
       {/* Sign Out Button (at the very bottom) */}
