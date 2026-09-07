@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -30,6 +30,9 @@ import {
   Phone,
   ArrowUpRight,
   Lock,
+  Globe,
+  Code,
+  Layers,
 } from 'lucide-react';
 import { api } from '../api/client';
 import { useAuthStore } from '../store/useAuthStore';
@@ -41,11 +44,14 @@ import ThemeToggle from '../components/common/ThemeToggle';
 const AdminPage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { user, token, isAuthenticated, setAuth, logout } = useAuthStore();
+  const { user, isAuthenticated, setAuth, logout } = useAuthStore();
   const { addToast } = useToastStore();
   const { formatAmount } = useCurrencyStore();
 
   const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'orders' | 'products' | 'internships'
+  const [productsSubtab, setProductsSubtab] = useState('accounts'); // 'accounts' | 'services'
+  const [internshipsSubtab, setInternshipsSubtab] = useState('applications'); // 'applications' | 'positions'
+
   const [orderFilter, setOrderFilter] = useState('All');
   const [orderSearch, setOrderSearch] = useState('');
   const [copiedUtr, setCopiedUtr] = useState(null);
@@ -55,12 +61,17 @@ const AdminPage = () => {
   const [loginPassword, setLoginPassword] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
 
-  // Add Product Modal state
+  // Modal states
   const [isAddAccountModalOpen, setIsAddAccountModalOpen] = useState(false);
+  const [isAddServiceModalOpen, setIsAddServiceModalOpen] = useState(false);
+  const [isAddInternshipModalOpen, setIsAddInternshipModalOpen] = useState(false);
+
+  // New Account state
   const [newAccount, setNewAccount] = useState({
     title: '',
     platform: 'Instagram',
     handle: '',
+    profileUrl: '',
     followersCount: '',
     engagementRate: '',
     niche: 'Tech & AI',
@@ -73,6 +84,41 @@ const AdminPage = () => {
     description: '',
     highlights: '',
     screenshots: '',
+  });
+
+  // New Service state
+  const [newService, setNewService] = useState({
+    title: '',
+    category: 'Full Stack Development',
+    shortDesc: '',
+    description: '',
+    turnaroundDays: '5',
+    icon: 'Sparkles',
+    deliverables: 'Complete Source Code\nProduction Deployment Guide\n14 Days Post-Launch Support',
+    starterName: 'Starter MVP',
+    starterPrice: '14999',
+    starterFeatures: 'Single page application\nResponsive UI design\nDeployment ready',
+    proName: 'Professional',
+    proPrice: '29999',
+    proFeatures: 'Full stack web app\nDatabase & authentication\nAPI integrations\nSEO optimized',
+    enterpriseName: 'Enterprise Scale',
+    enterprisePrice: '49999',
+    enterpriseFeatures: 'Custom architecture\nDedicated developer support\nHigh performance & caching\nPriority SLA',
+  });
+
+  // New Internship state
+  const [newInternship, setNewInternship] = useState({
+    title: '',
+    domain: 'Full Stack',
+    stipend: '₹25,000 - ₹40,000 / month',
+    duration: '3 Months',
+    location: 'Work From Home (Remote)',
+    openings: '2',
+    summary: '',
+    requirements: 'Solid foundation in modern web technologies\nGood problem solving and analytical mindset\nEager to build high-scale production systems',
+    responsibilities: 'Build animated frontend and robust backend APIs\nWork directly with senior engineering mentors\nParticipate in code reviews and sprint planning',
+    perks: 'Performance bonus & PPO track\nOfficial internship certificate\nDirect mentoring from Google-caliber engineers',
+    skills: 'React, Node.js, TailwindCSS, MongoDB, Git',
   });
 
   const isAdmin = isAuthenticated && user?.role === 'admin';
@@ -126,6 +172,18 @@ const AdminPage = () => {
     enabled: isAdmin,
   });
 
+  const { data: servicesData, isLoading: servicesLoading, refetch: refetchServices } = useQuery({
+    queryKey: ['admin-services'],
+    queryFn: () => api.getServices({}),
+    enabled: isAdmin,
+  });
+
+  const { data: internshipsData, isLoading: internshipsLoading, refetch: refetchInternships } = useQuery({
+    queryKey: ['admin-internships'],
+    queryFn: () => api.getInternships({}),
+    enabled: isAdmin,
+  });
+
   const { data: applicationsData, isLoading: applicationsLoading, refetch: refetchApplications } = useQuery({
     queryKey: ['admin-applications'],
     queryFn: () => api.getAllApplications({}),
@@ -165,6 +223,7 @@ const AdminPage = () => {
         title: '',
         platform: 'Instagram',
         handle: '',
+        profileUrl: '',
         followersCount: '',
         engagementRate: '',
         niche: 'Tech & AI',
@@ -198,6 +257,52 @@ const AdminPage = () => {
     },
   });
 
+  const createServiceMutation = useMutation({
+    mutationFn: (serviceData) => api.createService(serviceData),
+    onSuccess: () => {
+      addToast({ message: 'New digital service added to marketplace!', type: 'success' });
+      setIsAddServiceModalOpen(false);
+      queryClient.invalidateQueries({ queryKey: ['admin-services'] });
+    },
+    onError: (err) => {
+      addToast({ message: err.message || 'Failed to create digital service', type: 'error' });
+    },
+  });
+
+  const deleteServiceMutation = useMutation({
+    mutationFn: (id) => api.deleteService(id),
+    onSuccess: () => {
+      addToast({ message: 'Digital service removed.', type: 'info' });
+      queryClient.invalidateQueries({ queryKey: ['admin-services'] });
+    },
+    onError: (err) => {
+      addToast({ message: err.message || 'Failed to delete service', type: 'error' });
+    },
+  });
+
+  const createInternshipMutation = useMutation({
+    mutationFn: (internshipData) => api.createInternship(internshipData),
+    onSuccess: () => {
+      addToast({ message: 'New internship role published!', type: 'success' });
+      setIsAddInternshipModalOpen(false);
+      queryClient.invalidateQueries({ queryKey: ['admin-internships'] });
+    },
+    onError: (err) => {
+      addToast({ message: err.message || 'Failed to create internship', type: 'error' });
+    },
+  });
+
+  const deleteInternshipMutation = useMutation({
+    mutationFn: (id) => api.deleteInternship(id),
+    onSuccess: () => {
+      addToast({ message: 'Internship role removed.', type: 'info' });
+      queryClient.invalidateQueries({ queryKey: ['admin-internships'] });
+    },
+    onError: (err) => {
+      addToast({ message: err.message || 'Failed to delete internship', type: 'error' });
+    },
+  });
+
   const updateApplicationMutation = useMutation({
     mutationFn: ({ id, status }) => api.updateApplicationStatus(id, { status }),
     onSuccess: (data) => {
@@ -225,6 +330,7 @@ const AdminPage = () => {
 
     const payload = {
       ...newAccount,
+      profileUrl: newAccount.profileUrl ? newAccount.profileUrl.trim() : '',
       followersCount: Number(newAccount.followersCount) || 10000,
       engagementRate: Number(newAccount.engagementRate) || 5.0,
       price: Number(newAccount.price),
@@ -240,6 +346,89 @@ const AdminPage = () => {
     };
 
     createAccountMutation.mutate(payload);
+  };
+
+  const handleAddServiceSubmit = (e) => {
+    e.preventDefault();
+    if (!newService.title || !newService.category || !newService.starterPrice) {
+      addToast({ message: 'Please provide Title, Category, and Starter Tier Price', type: 'error' });
+      return;
+    }
+
+    const pricingTiers = [
+      {
+        tierName: newService.starterName || 'Starter MVP',
+        price: Number(newService.starterPrice),
+        turnaroundDays: Number(newService.turnaroundDays) || 3,
+        features: newService.starterFeatures.split('\n').filter((f) => f.trim()),
+        isPopular: false,
+      },
+      {
+        tierName: newService.proName || 'Professional',
+        price: Number(newService.proPrice) || Number(newService.starterPrice) * 2,
+        turnaroundDays: Number(newService.turnaroundDays) + 2 || 5,
+        features: newService.proFeatures.split('\n').filter((f) => f.trim()),
+        isPopular: true,
+      },
+      {
+        tierName: newService.enterpriseName || 'Enterprise Scale',
+        price: Number(newService.enterprisePrice) || Number(newService.starterPrice) * 3.5,
+        turnaroundDays: Number(newService.turnaroundDays) + 5 || 10,
+        features: newService.enterpriseFeatures.split('\n').filter((f) => f.trim()),
+        isPopular: false,
+      },
+    ];
+
+    const payload = {
+      title: newService.title.trim(),
+      category: newService.category.trim(),
+      shortDesc: newService.shortDesc ? newService.shortDesc.trim() : newService.title,
+      description: newService.description ? newService.description.trim() : newService.shortDesc,
+      turnaroundDays: Number(newService.turnaroundDays) || 5,
+      icon: newService.icon || 'Sparkles',
+      deliverables: newService.deliverables.split('\n').filter((d) => d.trim()),
+      pricingTiers,
+    };
+
+    createServiceMutation.mutate(payload);
+  };
+
+  const handleAddInternshipSubmit = (e) => {
+    e.preventDefault();
+    if (!newInternship.title || !newInternship.domain || !newInternship.stipend) {
+      addToast({ message: 'Please provide Title, Domain, and Monthly Stipend', type: 'error' });
+      return;
+    }
+
+    const payload = {
+      title: newInternship.title.trim(),
+      domain: newInternship.domain.trim(),
+      stipend: newInternship.stipend.trim(),
+      duration: newInternship.duration.trim(),
+      location: newInternship.location.trim(),
+      openings: Number(newInternship.openings) || 2,
+      summary: newInternship.summary ? newInternship.summary.trim() : `${newInternship.title} internship with mentor support.`,
+      requirements: newInternship.requirements.split('\n').filter((r) => r.trim()),
+      responsibilities: newInternship.responsibilities.split('\n').filter((r) => r.trim()),
+      perks: newInternship.perks.split('\n').filter((p) => p.trim()),
+      skills: newInternship.skills.split(',').map((s) => s.trim()).filter(Boolean),
+    };
+
+    createInternshipMutation.mutate(payload);
+  };
+
+  // Helper to get fallback social profile URL
+  const getAccountSocialLink = (acc) => {
+    if (acc.profileUrl) return acc.profileUrl;
+    const clean = (acc.handle || '').replace(/^@/, '').trim();
+    if (!clean) return '#';
+    const plat = (acc.platform || '').toLowerCase();
+    if (plat.includes('youtube')) return `https://youtube.com/@${clean}`;
+    if (plat.includes('instagram')) return `https://instagram.com/${clean}`;
+    if (plat.includes('tiktok')) return `https://tiktok.com/@${clean}`;
+    if (plat.includes('twitter') || plat === 'x') return `https://x.com/${clean}`;
+    if (plat.includes('telegram')) return `https://t.me/${clean}`;
+    return `https://${clean}`;
   };
 
   // IF NOT AUTHENTICATED AS ADMIN: SHOW ADMIN LOGIN CARD
@@ -362,6 +551,8 @@ const AdminPage = () => {
 
   const orders = ordersData?.orders || [];
   const accounts = accountsData?.accounts || [];
+  const services = servicesData?.services || [];
+  const internships = internshipsData?.internships || [];
   const applications = applicationsData?.applications || [];
 
   return (
@@ -431,7 +622,7 @@ const AdminPage = () => {
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
-              Products ({accounts.length})
+              Products ({accounts.length + services.length})
             </button>
             <button
               type="button"
@@ -443,7 +634,7 @@ const AdminPage = () => {
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
-              Applications ({applications.length})
+              Careers & Applications ({applications.length})
             </button>
           </div>
 
@@ -553,7 +744,7 @@ const AdminPage = () => {
                   {stats.availableAccounts} <span className="text-xs text-slate-400 font-normal">Available</span>
                 </div>
                 <p className="text-[11px] text-slate-500">
-                  {stats.soldAccounts} sold • {stats.totalAccounts} total listings
+                  {stats.soldAccounts} sold • {services.length} services • {internships.length} internships
                 </p>
               </div>
             </div>
@@ -564,7 +755,7 @@ const AdminPage = () => {
                 <h3 className="text-base font-bold text-slate-900 dark:text-white">
                   Admin Quick Controls
                 </h3>
-                <p className="text-xs text-slate-500">Instant shortcuts to add inventory and review transactions</p>
+                <p className="text-xs text-slate-500">Publish new marketplace inventory and manage career openings</p>
               </div>
 
               <div className="flex flex-wrap items-center gap-3">
@@ -579,11 +770,21 @@ const AdminPage = () => {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setActiveTab('orders')}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-slate-100 dark:bg-obsidian-850 hover:bg-slate-200 dark:hover:bg-obsidian-800 text-slate-900 dark:text-white font-bold text-xs border border-slate-200/80 dark:border-white/10 transition-all cursor-pointer"
+                  id="admin-add-service-btn"
+                  onClick={() => setIsAddServiceModalOpen(true)}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-purple-600 hover:bg-purple-500 active:scale-95 text-white font-bold text-xs shadow-md shadow-purple-600/25 transition-all cursor-pointer"
                 >
-                  <Clock className="w-4 h-4 text-amber-500" />
-                  <span>Review Pending Payments ({stats.pendingOrders})</span>
+                  <Plus className="w-4 h-4" />
+                  <span>Add Digital Service</span>
+                </button>
+                <button
+                  type="button"
+                  id="admin-add-internship-btn"
+                  onClick={() => setIsAddInternshipModalOpen(true)}
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold text-xs shadow-md shadow-emerald-600/25 transition-all cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Add Internship Opening</span>
                 </button>
               </div>
             </div>
@@ -950,252 +1151,492 @@ const AdminPage = () => {
                   Product Inventory Management
                 </h2>
                 <p className="text-xs text-slate-500">
-                  Add, configure, or remove verified social media accounts and services
+                  Manage social media accounts and high-impact digital development services
                 </p>
               </div>
 
-              <button
-                type="button"
-                onClick={() => setIsAddAccountModalOpen(true)}
-                id="admin-add-product-main-btn"
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-brand-600 hover:bg-brand-500 active:scale-95 text-white font-bold text-xs shadow-lg shadow-brand-600/30 transition-all cursor-pointer"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Add Social Account Listing</span>
-              </button>
-            </div>
-
-            {/* Accounts Table / Cards Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {accounts.map((acc) => (
-                <div
-                  key={acc._id}
-                  className="rounded-3xl p-5 bg-white dark:bg-obsidian-900 border border-slate-200/80 dark:border-white/10 shadow-sm flex flex-col justify-between space-y-4"
-                >
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-400">
-                        {acc.platform}
-                      </span>
-                      <span
-                        className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${
-                          acc.status === 'sold'
-                            ? 'bg-red-500/10 text-red-500'
-                            : 'bg-emerald-500/10 text-emerald-500'
-                        }`}
-                      >
-                        {acc.status === 'sold' ? 'Sold' : 'Available'}
-                      </span>
-                    </div>
-
-                    <div>
-                      <h3 className="text-base font-bold text-slate-900 dark:text-white line-clamp-1">
-                        {acc.title}
-                      </h3>
-                      <div className="text-xs font-mono text-slate-400">{acc.handle}</div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div className="p-2 rounded-xl bg-slate-50 dark:bg-obsidian-850">
-                        <span className="text-[10px] text-slate-400 block">Followers</span>
-                        <span className="font-bold text-slate-900 dark:text-white">
-                          {acc.followersCount?.toLocaleString()}
-                        </span>
-                      </div>
-                      <div className="p-2 rounded-xl bg-slate-50 dark:bg-obsidian-850">
-                        <span className="text-[10px] text-slate-400 block">Price</span>
-                        <span className="font-bold text-brand-600 dark:text-brand-400">
-                          {formatAmount(acc.price)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="pt-3 border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
-                    <Link
-                      to={`/accounts/${acc._id}`}
-                      target="_blank"
-                      className="text-xs font-bold text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center gap-1"
-                    >
-                      <span>Preview</span>
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </Link>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (confirm(`Are you sure you want to delete ${acc.title}?`)) {
-                          deleteAccountMutation.mutate(acc._id);
-                        }
-                      }}
-                      className="p-2 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer"
-                      title="Delete Listing"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
+              {/* Subtab Toggle Buttons */}
+              <div className="flex items-center gap-2">
+                <div className="bg-slate-100 dark:bg-obsidian-850 p-1 rounded-2xl border border-slate-200/80 dark:border-white/5 flex items-center">
+                  <button
+                    type="button"
+                    onClick={() => setProductsSubtab('accounts')}
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      productsSubtab === 'accounts'
+                        ? 'bg-white dark:bg-obsidian-900 text-brand-600 dark:text-brand-400 shadow-sm'
+                        : 'text-slate-600 dark:text-slate-400'
+                    }`}
+                  >
+                    Social Accounts ({accounts.length})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setProductsSubtab('services')}
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      productsSubtab === 'services'
+                        ? 'bg-white dark:bg-obsidian-900 text-purple-600 dark:text-purple-400 shadow-sm'
+                        : 'text-slate-600 dark:text-slate-400'
+                    }`}
+                  >
+                    Digital Services ({services.length})
+                  </button>
                 </div>
-              ))}
+
+                {productsSubtab === 'accounts' ? (
+                  <button
+                    type="button"
+                    onClick={() => setIsAddAccountModalOpen(true)}
+                    id="admin-add-product-main-btn"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-brand-600 hover:bg-brand-500 active:scale-95 text-white font-bold text-xs shadow-md shadow-brand-600/30 transition-all cursor-pointer"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Add Social Account</span>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setIsAddServiceModalOpen(true)}
+                    id="admin-add-service-main-btn"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-purple-600 hover:bg-purple-500 active:scale-95 text-white font-bold text-xs shadow-md shadow-purple-600/30 transition-all cursor-pointer"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Add Digital Service</span>
+                  </button>
+                )}
+              </div>
             </div>
+
+            {/* Subtab 1: Social Accounts Grid */}
+            {productsSubtab === 'accounts' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {accounts.map((acc) => (
+                  <div
+                    key={acc._id}
+                    className="rounded-3xl p-5 bg-white dark:bg-obsidian-900 border border-slate-200/80 dark:border-white/10 shadow-sm flex flex-col justify-between space-y-4"
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-400">
+                          {acc.platform}
+                        </span>
+                        <span
+                          className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${
+                            acc.status === 'sold'
+                              ? 'bg-red-500/10 text-red-500'
+                              : 'bg-emerald-500/10 text-emerald-500'
+                          }`}
+                        >
+                          {acc.status === 'sold' ? 'Sold' : 'Available'}
+                        </span>
+                      </div>
+
+                      <div>
+                        <h3 className="text-base font-bold text-slate-900 dark:text-white line-clamp-1">
+                          {acc.title}
+                        </h3>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-xs font-mono text-slate-400">{acc.handle}</span>
+                          <a
+                            href={getAccountSocialLink(acc)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[11px] font-bold text-brand-600 dark:text-brand-400 hover:underline flex items-center gap-0.5"
+                            title="Open live social profile"
+                          >
+                            <span>Live Profile</span>
+                            <ArrowUpRight className="w-3 h-3" />
+                          </a>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div className="p-2 rounded-xl bg-slate-50 dark:bg-obsidian-850">
+                          <span className="text-[10px] text-slate-400 block">Followers</span>
+                          <span className="font-bold text-slate-900 dark:text-white">
+                            {acc.followersCount?.toLocaleString()}
+                          </span>
+                        </div>
+                        <div className="p-2 rounded-xl bg-slate-50 dark:bg-obsidian-850">
+                          <span className="text-[10px] text-slate-400 block">Price</span>
+                          <span className="font-bold text-brand-600 dark:text-brand-400">
+                            {formatAmount(acc.price)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="pt-3 border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
+                      <Link
+                        to={`/accounts/${acc._id}`}
+                        target="_blank"
+                        className="text-xs font-bold text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center gap-1"
+                      >
+                        <span>Storefront Preview</span>
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </Link>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (confirm(`Are you sure you want to delete ${acc.title}?`)) {
+                            deleteAccountMutation.mutate(acc._id);
+                          }
+                        }}
+                        className="p-2 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer"
+                        title="Delete Listing"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Subtab 2: Digital Services Grid */}
+            {productsSubtab === 'services' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {services.map((srv) => (
+                  <div
+                    key={srv._id}
+                    className="rounded-3xl p-5 bg-white dark:bg-obsidian-900 border border-slate-200/80 dark:border-white/10 shadow-sm flex flex-col justify-between space-y-4"
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400">
+                          {srv.category}
+                        </span>
+                        <span className="text-xs text-slate-400 flex items-center gap-1">
+                          <Clock className="w-3.5 h-3.5 text-purple-500" />
+                          <span>~{srv.turnaroundDays || 5} Days</span>
+                        </span>
+                      </div>
+
+                      <div>
+                        <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                          {srv.title}
+                        </h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
+                          {srv.shortDesc || srv.description}
+                        </p>
+                      </div>
+
+                      {/* Tiers overview */}
+                      <div className="space-y-1.5 pt-1">
+                        <span className="text-[10px] uppercase font-bold text-slate-400 block">Package Tiers</span>
+                        <div className="grid grid-cols-3 gap-1.5 text-center text-xs">
+                          {srv.pricingTiers?.map((t, idx) => (
+                            <div key={idx} className="p-2 rounded-xl bg-slate-50 dark:bg-obsidian-850 border border-slate-200/50 dark:border-white/5">
+                              <span className="text-[10px] text-slate-400 block truncate">{t.tierName}</span>
+                              <span className="font-bold text-slate-900 dark:text-white block mt-0.5">
+                                {formatAmount(t.price)}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="pt-3 border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
+                      <Link
+                        to={`/services/${srv._id}`}
+                        target="_blank"
+                        className="text-xs font-bold text-purple-600 dark:text-purple-400 hover:underline flex items-center gap-1"
+                      >
+                        <span>View Packages</span>
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </Link>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (confirm(`Are you sure you want to delete ${srv.title}?`)) {
+                            deleteServiceMutation.mutate(srv._id);
+                          }
+                        }}
+                        className="p-2 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer"
+                        title="Delete Service"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
         {/* ============================================================== */}
-        {/* TAB 4: INTERNSHIP CANDIDATE APPLICATIONS */}
+        {/* TAB 4: INTERNSHIP CANDIDATE APPLICATIONS & POSITIONS */}
         {/* ============================================================== */}
         {activeTab === 'internships' && (
           <div className="space-y-6 animate-in fade-in duration-300">
-            <div>
-              <h2 className="text-2xl font-black font-display text-slate-900 dark:text-white">
-                Internship Applications Talent Pool
-              </h2>
-              <p className="text-xs text-slate-500">
-                Review candidate resumes, portfolios, statements of purpose, and manage hiring statuses
-              </p>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-black font-display text-slate-900 dark:text-white">
+                  Careers & Internship Management
+                </h2>
+                <p className="text-xs text-slate-500">
+                  Review student applications and manage open engineering internship positions
+                </p>
+              </div>
+
+              {/* Subtabs and Add Internship Button */}
+              <div className="flex items-center gap-2">
+                <div className="bg-slate-100 dark:bg-obsidian-850 p-1 rounded-2xl border border-slate-200/80 dark:border-white/5 flex items-center">
+                  <button
+                    type="button"
+                    onClick={() => setInternshipsSubtab('applications')}
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      internshipsSubtab === 'applications'
+                        ? 'bg-white dark:bg-obsidian-900 text-brand-600 dark:text-brand-400 shadow-sm'
+                        : 'text-slate-600 dark:text-slate-400'
+                    }`}
+                  >
+                    Applications ({applications.length})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setInternshipsSubtab('positions')}
+                    className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      internshipsSubtab === 'positions'
+                        ? 'bg-white dark:bg-obsidian-900 text-emerald-600 dark:text-emerald-400 shadow-sm'
+                        : 'text-slate-600 dark:text-slate-400'
+                    }`}
+                  >
+                    Positions ({internships.length})
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setIsAddInternshipModalOpen(true)}
+                  id="admin-add-internship-main-btn"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold text-xs shadow-md shadow-emerald-600/30 transition-all cursor-pointer"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Add Internship Role</span>
+                </button>
+              </div>
             </div>
 
-            {applicationsLoading ? (
-              <div className="p-12 text-center text-xs text-slate-400">Loading applications...</div>
-            ) : applications.length === 0 ? (
-              <div className="rounded-3xl p-12 text-center bg-white dark:bg-obsidian-900 border border-slate-200/80 dark:border-white/10 text-slate-400 text-xs space-y-2">
-                <Briefcase className="w-8 h-8 mx-auto text-slate-400" />
-                <p>No internship applications submitted yet.</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {applications.map((app) => (
-                  <div
-                    key={app._id}
-                    className="p-6 rounded-3xl bg-white dark:bg-obsidian-900 border border-slate-200/80 dark:border-white/10 shadow-sm space-y-4"
-                  >
-                    <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-white/5">
-                      <div>
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400 bg-brand-500/10 px-2.5 py-0.5 rounded-full">
-                          {app.domain}
-                        </span>
-                        <h3 className="text-lg font-bold text-slate-900 dark:text-white mt-1">
-                          {app.applicantName}
-                        </h3>
-                        <div className="text-xs text-slate-500">
-                          Applied for: <span className="font-semibold text-slate-800 dark:text-slate-200">{app.internshipTitle}</span> • {new Date(app.submittedAt).toLocaleDateString()}
+            {/* Applications View */}
+            {internshipsSubtab === 'applications' && (
+              <div>
+                {applicationsLoading ? (
+                  <div className="p-12 text-center text-xs text-slate-400">Loading applications...</div>
+                ) : applications.length === 0 ? (
+                  <div className="rounded-3xl p-12 text-center bg-white dark:bg-obsidian-900 border border-slate-200/80 dark:border-white/10 text-slate-400 text-xs space-y-2">
+                    <Briefcase className="w-8 h-8 mx-auto text-slate-400" />
+                    <p>No internship applications submitted yet.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {applications.map((app) => (
+                      <div
+                        key={app._id}
+                        className="p-6 rounded-3xl bg-white dark:bg-obsidian-900 border border-slate-200/80 dark:border-white/10 shadow-sm space-y-4"
+                      >
+                        <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-white/5">
+                          <div>
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400 bg-brand-500/10 px-2.5 py-0.5 rounded-full">
+                              {app.domain}
+                            </span>
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-white mt-1">
+                              {app.applicantName}
+                            </h3>
+                            <div className="text-xs text-slate-500">
+                              Applied for: <span className="font-semibold text-slate-800 dark:text-slate-200">{app.internshipTitle}</span> • {new Date(app.submittedAt).toLocaleDateString()}
+                            </div>
+                          </div>
+
+                          {/* Status Badge */}
+                          <span
+                            className={`text-xs font-bold px-3 py-1 rounded-full ${
+                              app.status === 'Accepted'
+                                ? 'bg-emerald-500/10 text-emerald-500'
+                                : app.status === 'Shortlisted'
+                                ? 'bg-blue-500/10 text-blue-500'
+                                : app.status === 'Rejected'
+                                ? 'bg-red-500/10 text-red-500'
+                                : 'bg-amber-500/10 text-amber-500'
+                            }`}
+                          >
+                            {app.status}
+                          </span>
+                        </div>
+
+                        {/* Contact & Links */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+                          <div className="p-3 rounded-2xl bg-slate-50 dark:bg-obsidian-850">
+                            <span className="text-[10px] text-slate-400 block">Email</span>
+                            <span className="font-semibold text-slate-900 dark:text-white select-all">
+                              {app.email}
+                            </span>
+                          </div>
+                          <div className="p-3 rounded-2xl bg-slate-50 dark:bg-obsidian-850">
+                            <span className="text-[10px] text-slate-400 block">Phone</span>
+                            <span className="font-semibold text-slate-900 dark:text-white select-all">
+                              {app.phone}
+                            </span>
+                          </div>
+                          <div className="p-3 rounded-2xl bg-slate-50 dark:bg-obsidian-850">
+                            <span className="text-[10px] text-slate-400 block">Experience Level</span>
+                            <span className="font-semibold text-slate-900 dark:text-white">
+                              {app.experienceLevel}
+                            </span>
+                          </div>
+                          <div className="p-3 rounded-2xl bg-slate-50 dark:bg-obsidian-850 flex items-center gap-3">
+                            {app.portfolioUrl && (
+                              <a
+                                href={app.portfolioUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-brand-600 dark:text-brand-400 hover:underline font-bold"
+                              >
+                                Portfolio ↗
+                              </a>
+                            )}
+                            {app.githubUrl && (
+                              <a
+                                href={app.githubUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-slate-900 dark:text-white hover:underline font-bold"
+                              >
+                                GitHub ↗
+                              </a>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Statement of Purpose */}
+                        {app.whyJoin && (
+                          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-obsidian-850/60 border border-slate-100 dark:border-white/5 space-y-1 text-xs">
+                            <span className="text-[10px] font-bold uppercase text-slate-400">
+                              Statement of Purpose:
+                            </span>
+                            <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
+                              {app.whyJoin}
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Action Controls */}
+                        <div className="pt-2 flex flex-wrap items-center justify-between gap-3">
+                          <a
+                            href={`https://wa.me/${app.phone.replace(/\D/g, '')}?text=${encodeURIComponent(
+                              `Hi ${app.applicantName}, Modern Teams talent team here regarding your application for the ${app.internshipTitle} position.`
+                            )}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline"
+                          >
+                            <MessageCircle className="w-4 h-4" />
+                            <span>Message on WhatsApp</span>
+                          </a>
+
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                updateApplicationMutation.mutate({ id: app._id, status: 'Shortlisted' })
+                              }
+                              className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md shadow-blue-600/20 cursor-pointer"
+                            >
+                              Shortlist
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                updateApplicationMutation.mutate({ id: app._id, status: 'Accepted' })
+                              }
+                              className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md shadow-emerald-600/20 cursor-pointer"
+                            >
+                              Hire / Accept
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                updateApplicationMutation.mutate({ id: app._id, status: 'Rejected' })
+                              }
+                              className="px-3.5 py-1.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 font-bold text-xs cursor-pointer"
+                            >
+                              Reject
+                            </button>
+                          </div>
                         </div>
                       </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
 
-                      {/* Status Dropdown / Badge */}
-                      <span
-                        className={`text-xs font-bold px-3 py-1 rounded-full ${
-                          app.status === 'Accepted'
-                            ? 'bg-emerald-500/10 text-emerald-500'
-                            : app.status === 'Shortlisted'
-                            ? 'bg-blue-500/10 text-blue-500'
-                            : app.status === 'Rejected'
-                            ? 'bg-red-500/10 text-red-500'
-                            : 'bg-amber-500/10 text-amber-500'
-                        }`}
-                      >
-                        {app.status}
-                      </span>
-                    </div>
+            {/* Positions View */}
+            {internshipsSubtab === 'positions' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {internships.map((role) => (
+                  <div
+                    key={role._id}
+                    className="rounded-3xl p-6 bg-white dark:bg-obsidian-900 border border-slate-200/80 dark:border-white/10 shadow-sm flex flex-col justify-between space-y-4"
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                          {role.domain}
+                        </span>
+                        <span className="text-xs font-bold text-slate-400">{role.openings} Openings</span>
+                      </div>
 
-                    {/* Contact & Links */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
-                      <div className="p-3 rounded-2xl bg-slate-50 dark:bg-obsidian-850">
-                        <span className="text-[10px] text-slate-400 block">Email</span>
-                        <span className="font-semibold text-slate-900 dark:text-white select-all">
-                          {app.email}
-                        </span>
-                      </div>
-                      <div className="p-3 rounded-2xl bg-slate-50 dark:bg-obsidian-850">
-                        <span className="text-[10px] text-slate-400 block">Phone</span>
-                        <span className="font-semibold text-slate-900 dark:text-white select-all">
-                          {app.phone}
-                        </span>
-                      </div>
-                      <div className="p-3 rounded-2xl bg-slate-50 dark:bg-obsidian-850">
-                        <span className="text-[10px] text-slate-400 block">Experience Level</span>
-                        <span className="font-semibold text-slate-900 dark:text-white">
-                          {app.experienceLevel}
-                        </span>
-                      </div>
-                      <div className="p-3 rounded-2xl bg-slate-50 dark:bg-obsidian-850 flex items-center gap-3">
-                        {app.portfolioUrl && (
-                          <a
-                            href={app.portfolioUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-brand-600 dark:text-brand-400 hover:underline font-bold"
-                          >
-                            Portfolio ↗
-                          </a>
-                        )}
-                        {app.githubUrl && (
-                          <a
-                            href={app.githubUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-slate-900 dark:text-white hover:underline font-bold"
-                          >
-                            GitHub ↗
-                          </a>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Statement of Purpose */}
-                    {app.whyJoin && (
-                      <div className="p-4 rounded-2xl bg-slate-50 dark:bg-obsidian-850/60 border border-slate-100 dark:border-white/5 space-y-1 text-xs">
-                        <span className="text-[10px] font-bold uppercase text-slate-400">
-                          Statement of Purpose:
-                        </span>
-                        <p className="text-slate-600 dark:text-slate-300 leading-relaxed">
-                          {app.whyJoin}
+                      <div>
+                        <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                          {role.title}
+                        </h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
+                          {role.summary}
                         </p>
                       </div>
-                    )}
 
-                    {/* Action Controls */}
-                    <div className="pt-2 flex flex-wrap items-center justify-between gap-3">
-                      <a
-                        href={`https://wa.me/${app.phone.replace(/\D/g, '')}?text=${encodeURIComponent(
-                          `Hi ${app.applicantName}, Modern Teams talent team here regarding your application for the ${app.internshipTitle} position.`
-                        )}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline"
-                      >
-                        <MessageCircle className="w-4 h-4" />
-                        <span>Message on WhatsApp</span>
-                      </a>
-
-                      <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() =>
-                            updateApplicationMutation.mutate({ id: app._id, status: 'Shortlisted' })
-                          }
-                          className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md shadow-blue-600/20 cursor-pointer"
-                        >
-                          Shortlist
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            updateApplicationMutation.mutate({ id: app._id, status: 'Accepted' })
-                          }
-                          className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md shadow-emerald-600/20 cursor-pointer"
-                        >
-                          Hire / Accept
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            updateApplicationMutation.mutate({ id: app._id, status: 'Rejected' })
-                          }
-                          className="px-3.5 py-1.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 font-bold text-xs cursor-pointer"
-                        >
-                          Reject
-                        </button>
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div className="p-3 rounded-2xl bg-slate-50 dark:bg-obsidian-850">
+                          <span className="text-[10px] text-slate-400 block">Stipend</span>
+                          <span className="font-bold text-emerald-500 block mt-0.5 truncate">
+                            {role.stipend}
+                          </span>
+                        </div>
+                        <div className="p-3 rounded-2xl bg-slate-50 dark:bg-obsidian-850">
+                          <span className="text-[10px] text-slate-400 block">Duration</span>
+                          <span className="font-bold text-slate-900 dark:text-white block mt-0.5">
+                            {role.duration}
+                          </span>
+                        </div>
                       </div>
+                    </div>
+
+                    <div className="pt-3 border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
+                      <Link
+                        to={`/internships/${role._id}/apply`}
+                        target="_blank"
+                        className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
+                      >
+                        <span>Application Form Preview</span>
+                        <ExternalLink className="w-3.5 h-3.5" />
+                      </Link>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (confirm(`Are you sure you want to delete ${role.title}?`)) {
+                            deleteInternshipMutation.mutate(role._id);
+                          }
+                        }}
+                        className="p-2 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer"
+                        title="Delete Role"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -1206,7 +1647,7 @@ const AdminPage = () => {
       </div>
 
       {/* ============================================================== */}
-      {/* ADD ACCOUNT PRODUCT MODAL */}
+      {/* 1. ADD SOCIAL ACCOUNT MODAL */}
       {/* ============================================================== */}
       {isAddAccountModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
@@ -1268,6 +1709,22 @@ const AdminPage = () => {
                     placeholder="@handle"
                     className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-obsidian-850 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white"
                     required
+                  />
+                </div>
+
+                {/* Social Media Link Field (Requested by User) */}
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-900 dark:text-white flex items-center justify-between">
+                    <span>Social Media Profile Link</span>
+                    <span className="text-[10px] text-brand-600 dark:text-brand-400 font-normal">URL or Auto-generated</span>
+                  </label>
+                  <input
+                    type="url"
+                    id="new-account-url"
+                    value={newAccount.profileUrl}
+                    onChange={(e) => setNewAccount({ ...newAccount, profileUrl: e.target.value })}
+                    placeholder="https://instagram.com/handle or https://youtube.com/@handle"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-obsidian-850 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white"
                   />
                 </div>
 
@@ -1393,6 +1850,360 @@ const AdminPage = () => {
                   className="flex-1 py-3 rounded-2xl bg-brand-600 hover:bg-brand-500 text-white font-bold shadow-lg shadow-brand-600/30"
                 >
                   {createAccountMutation.isPending ? 'Publishing...' : 'Publish Account'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================== */}
+      {/* 2. ADD DIGITAL SERVICE MODAL (Requested by User) */}
+      {/* ============================================================== */}
+      {isAddServiceModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-white dark:bg-obsidian-900 border border-slate-200/80 dark:border-white/10 rounded-3xl p-6 sm:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto space-y-6 shadow-2xl">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-white/5">
+              <div>
+                <h3 className="text-xl font-bold font-display text-slate-900 dark:text-white">
+                  Add New Digital Service
+                </h3>
+                <p className="text-xs text-slate-500">Configure deliverables and 3 package tiers for client booking</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAddServiceModalOpen(false)}
+                className="p-2 rounded-xl text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleAddServiceSubmit} className="space-y-4 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-900 dark:text-white">Service Title *</label>
+                  <input
+                    type="text"
+                    id="new-service-title"
+                    value={newService.title}
+                    onChange={(e) => setNewService({ ...newService, title: e.target.value })}
+                    placeholder="e.g. Modern Full Stack Web App Development"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-obsidian-850 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-900 dark:text-white">Category *</label>
+                  <select
+                    value={newService.category}
+                    id="new-service-category"
+                    onChange={(e) => setNewService({ ...newService, category: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-obsidian-850 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white"
+                  >
+                    <option value="Full Stack Development">Full Stack Development</option>
+                    <option value="UI/UX Design & Branding">UI/UX Design & Branding</option>
+                    <option value="Mobile App Development">Mobile App Development</option>
+                    <option value="AI & Machine Learning Solutions">AI & Machine Learning Solutions</option>
+                    <option value="Cloud Infrastructure & DevOps">Cloud Infrastructure & DevOps</option>
+                    <option value="Social Media Growth Strategy">Social Media Growth Strategy</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1 sm:col-span-2">
+                  <label className="font-bold text-slate-900 dark:text-white">Short Description (1 line) *</label>
+                  <input
+                    type="text"
+                    value={newService.shortDesc}
+                    onChange={(e) => setNewService({ ...newService, shortDesc: e.target.value })}
+                    placeholder="High-performance web applications built with Next.js, React, Node, and TailwindCSS."
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-obsidian-850 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-1 sm:col-span-2">
+                  <label className="font-bold text-slate-900 dark:text-white">Key Deliverables (1 per line)</label>
+                  <textarea
+                    rows="2"
+                    value={newService.deliverables}
+                    onChange={(e) => setNewService({ ...newService, deliverables: e.target.value })}
+                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-obsidian-850 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white"
+                  />
+                </div>
+              </div>
+
+              {/* 3 Package Tiers Form */}
+              <div className="space-y-3 pt-2 border-t border-slate-100 dark:border-white/5">
+                <span className="font-bold text-sm text-slate-900 dark:text-white block">
+                  Package Pricing Tiers (INR ₹)
+                </span>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {/* Starter Tier */}
+                  <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-obsidian-850 border border-slate-200/60 dark:border-white/5 space-y-2">
+                    <span className="font-bold text-brand-600 dark:text-brand-400 block">Tier 1: Starter</span>
+                    <input
+                      type="text"
+                      placeholder="Tier Name"
+                      value={newService.starterName}
+                      onChange={(e) => setNewService({ ...newService, starterName: e.target.value })}
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-obsidian-900 border border-slate-200 dark:border-white/10 text-xs"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Price in INR"
+                      value={newService.starterPrice}
+                      onChange={(e) => setNewService({ ...newService, starterPrice: e.target.value })}
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-obsidian-900 border border-slate-200 dark:border-white/10 text-xs font-bold"
+                      required
+                    />
+                    <textarea
+                      rows="2"
+                      placeholder="Features (1 per line)"
+                      value={newService.starterFeatures}
+                      onChange={(e) => setNewService({ ...newService, starterFeatures: e.target.value })}
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-obsidian-900 border border-slate-200 dark:border-white/10 text-[11px]"
+                    />
+                  </div>
+
+                  {/* Pro Tier */}
+                  <div className="p-3.5 rounded-2xl bg-purple-500/10 border border-purple-500/30 space-y-2">
+                    <span className="font-bold text-purple-600 dark:text-purple-400 block">Tier 2: Pro (Popular)</span>
+                    <input
+                      type="text"
+                      placeholder="Tier Name"
+                      value={newService.proName}
+                      onChange={(e) => setNewService({ ...newService, proName: e.target.value })}
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-obsidian-900 border border-slate-200 dark:border-white/10 text-xs"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Price in INR"
+                      value={newService.proPrice}
+                      onChange={(e) => setNewService({ ...newService, proPrice: e.target.value })}
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-obsidian-900 border border-slate-200 dark:border-white/10 text-xs font-bold"
+                    />
+                    <textarea
+                      rows="2"
+                      placeholder="Features (1 per line)"
+                      value={newService.proFeatures}
+                      onChange={(e) => setNewService({ ...newService, proFeatures: e.target.value })}
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-obsidian-900 border border-slate-200 dark:border-white/10 text-[11px]"
+                    />
+                  </div>
+
+                  {/* Enterprise Tier */}
+                  <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-obsidian-850 border border-slate-200/60 dark:border-white/5 space-y-2">
+                    <span className="font-bold text-slate-900 dark:text-white block">Tier 3: Enterprise</span>
+                    <input
+                      type="text"
+                      placeholder="Tier Name"
+                      value={newService.enterpriseName}
+                      onChange={(e) => setNewService({ ...newService, enterpriseName: e.target.value })}
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-obsidian-900 border border-slate-200 dark:border-white/10 text-xs"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Price in INR"
+                      value={newService.enterprisePrice}
+                      onChange={(e) => setNewService({ ...newService, enterprisePrice: e.target.value })}
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-obsidian-900 border border-slate-200 dark:border-white/10 text-xs font-bold"
+                    />
+                    <textarea
+                      rows="2"
+                      placeholder="Features (1 per line)"
+                      value={newService.enterpriseFeatures}
+                      onChange={(e) => setNewService({ ...newService, enterpriseFeatures: e.target.value })}
+                      className="w-full px-2.5 py-1.5 rounded-lg bg-white dark:bg-obsidian-900 border border-slate-200 dark:border-white/10 text-[11px]"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-slate-100 dark:border-white/5 flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsAddServiceModalOpen(false)}
+                  className="flex-1 py-3 rounded-2xl bg-slate-100 dark:bg-obsidian-850 text-slate-700 dark:text-slate-300 font-bold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  id="submit-new-service-btn"
+                  disabled={createServiceMutation.isPending}
+                  className="flex-1 py-3 rounded-2xl bg-purple-600 hover:bg-purple-500 text-white font-bold shadow-lg shadow-purple-600/30"
+                >
+                  {createServiceMutation.isPending ? 'Publishing...' : 'Publish Service'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================== */}
+      {/* 3. ADD INTERNSHIP ROLE MODAL (Requested by User) */}
+      {/* ============================================================== */}
+      {isAddInternshipModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-white dark:bg-obsidian-900 border border-slate-200/80 dark:border-white/10 rounded-3xl p-6 sm:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto space-y-6 shadow-2xl">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-white/5">
+              <div>
+                <h3 className="text-xl font-bold font-display text-slate-900 dark:text-white">
+                  Add New Internship Position
+                </h3>
+                <p className="text-xs text-slate-500">Post a paid engineering or design role for student talent</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAddInternshipModalOpen(false)}
+                className="p-2 rounded-xl text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleAddInternshipSubmit} className="space-y-4 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-900 dark:text-white">Position Title *</label>
+                  <input
+                    type="text"
+                    id="new-internship-title"
+                    value={newInternship.title}
+                    onChange={(e) => setNewInternship({ ...newInternship, title: e.target.value })}
+                    placeholder="e.g. AI & Machine Learning Engineer Intern"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-obsidian-850 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-900 dark:text-white">Domain *</label>
+                  <select
+                    value={newInternship.domain}
+                    id="new-internship-domain"
+                    onChange={(e) => setNewInternship({ ...newInternship, domain: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-obsidian-850 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white"
+                  >
+                    <option value="Full Stack">Full Stack</option>
+                    <option value="Frontend">Frontend</option>
+                    <option value="Backend">Backend</option>
+                    <option value="AI & Machine Learning">AI & Machine Learning</option>
+                    <option value="UI/UX Design">UI/UX Design</option>
+                    <option value="Digital Marketing">Digital Marketing</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-900 dark:text-white">Monthly Stipend *</label>
+                  <input
+                    type="text"
+                    id="new-internship-stipend"
+                    value={newInternship.stipend}
+                    onChange={(e) => setNewInternship({ ...newInternship, stipend: e.target.value })}
+                    placeholder="e.g. ₹25,000 - ₹40,000 / month"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-obsidian-850 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-900 dark:text-white">Duration</label>
+                  <input
+                    type="text"
+                    value={newInternship.duration}
+                    onChange={(e) => setNewInternship({ ...newInternship, duration: e.target.value })}
+                    placeholder="e.g. 3 Months"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-obsidian-850 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-900 dark:text-white">Openings Count</label>
+                  <input
+                    type="number"
+                    value={newInternship.openings}
+                    onChange={(e) => setNewInternship({ ...newInternship, openings: e.target.value })}
+                    placeholder="e.g. 3"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-obsidian-850 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-900 dark:text-white">Location</label>
+                  <input
+                    type="text"
+                    value={newInternship.location}
+                    onChange={(e) => setNewInternship({ ...newInternship, location: e.target.value })}
+                    placeholder="e.g. Work From Home (Remote)"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-obsidian-850 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-bold text-slate-900 dark:text-white">Role Summary (1 line)</label>
+                <input
+                  type="text"
+                  value={newInternship.summary}
+                  onChange={(e) => setNewInternship({ ...newInternship, summary: e.target.value })}
+                  placeholder="e.g. Build production neural net pipelines with direct mentoring."
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-obsidian-850 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-bold text-slate-900 dark:text-white">Required Skills (comma separated)</label>
+                <input
+                  type="text"
+                  value={newInternship.skills}
+                  onChange={(e) => setNewInternship({ ...newInternship, skills: e.target.value })}
+                  placeholder="Python, PyTorch, React, FastApi"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-obsidian-850 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-900 dark:text-white">Requirements (1 per line)</label>
+                  <textarea
+                    rows="2"
+                    value={newInternship.requirements}
+                    onChange={(e) => setNewInternship({ ...newInternship, requirements: e.target.value })}
+                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-obsidian-850 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-900 dark:text-white">Responsibilities (1 per line)</label>
+                  <textarea
+                    rows="2"
+                    value={newInternship.responsibilities}
+                    onChange={(e) => setNewInternship({ ...newInternship, responsibilities: e.target.value })}
+                    className="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-obsidian-850 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-slate-100 dark:border-white/5 flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsAddInternshipModalOpen(false)}
+                  className="flex-1 py-3 rounded-2xl bg-slate-100 dark:bg-obsidian-850 text-slate-700 dark:text-slate-300 font-bold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  id="submit-new-internship-btn"
+                  disabled={createInternshipMutation.isPending}
+                  className="flex-1 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold shadow-lg shadow-emerald-600/30"
+                >
+                  {createInternshipMutation.isPending ? 'Publishing...' : 'Publish Position'}
                 </button>
               </div>
             </form>

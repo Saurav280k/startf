@@ -57,6 +57,19 @@ const AccountCard = ({ account }) => {
 
   const inCart = items.some((i) => i.id === account._id);
 
+  const getSocialLink = (acc) => {
+    if (acc.profileUrl) return acc.profileUrl;
+    const cleanHandle = (acc.handle || '').trim().replace(/^@/, '');
+    if (!cleanHandle) return '#';
+    const plat = (acc.platform || '').toLowerCase();
+    if (plat.includes('youtube')) return `https://youtube.com/@${cleanHandle}`;
+    if (plat.includes('instagram')) return `https://instagram.com/${cleanHandle}`;
+    if (plat.includes('tiktok')) return `https://tiktok.com/@${cleanHandle}`;
+    if (plat.includes('twitter') || plat === 'x') return `https://x.com/${cleanHandle}`;
+    if (plat.includes('telegram')) return `https://t.me/${cleanHandle}`;
+    return `https://${cleanHandle}`;
+  };
+
   const handleCartClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -116,9 +129,21 @@ const AccountCard = ({ account }) => {
 
           {/* Handle & Niche overlay */}
           <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-white text-xs">
-            <span className="font-mono font-medium opacity-90 truncate max-w-[180px]">
-              {account.handle}
-            </span>
+            <div className="flex items-center gap-1.5 min-w-0">
+              <span className="font-mono font-medium opacity-90 truncate max-w-[140px]">
+                {account.handle}
+              </span>
+              <a
+                href={getSocialLink(account)}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="p-1 rounded-lg bg-white/20 hover:bg-white/40 text-white backdrop-blur-md transition-all flex items-center justify-center shrink-0 z-10 hover:scale-110"
+                title={`Visit ${account.platform} profile (${account.handle})`}
+              >
+                <ArrowUpRight className="w-3 h-3" />
+              </a>
+            </div>
             <span className="bg-white/20 backdrop-blur-md px-2 py-0.5 rounded-full text-[10px] font-medium">
               {account.niche}
             </span>

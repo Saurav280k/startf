@@ -15,6 +15,7 @@ import {
   ArrowLeft,
   ShoppingCart,
   Check,
+  ExternalLink,
 } from 'lucide-react';
 import { api } from '../api/client';
 import ScreenshotGallery from '../components/accounts/ScreenshotGallery';
@@ -245,7 +246,32 @@ const AccountDetailPage = () => {
               <h1 className="text-2xl font-black font-display text-slate-900 dark:text-white">
                 {account.title}
               </h1>
-              <p className="text-xs font-mono text-slate-500 mt-1">{account.handle}</p>
+              <div className="flex items-center justify-between mt-1 pt-1">
+                <span className="text-xs font-mono text-slate-500">{account.handle}</span>
+                <a
+                  href={
+                    account.profileUrl ||
+                    `https://${
+                      account.platform?.toLowerCase() === 'youtube'
+                        ? 'youtube.com/@'
+                        : account.platform?.toLowerCase() === 'instagram'
+                        ? 'instagram.com/'
+                        : account.platform?.toLowerCase() === 'tiktok'
+                        ? 'tiktok.com/@'
+                        : account.platform?.toLowerCase() === 'telegram'
+                        ? 't.me/'
+                        : 'x.com/'
+                    }${account.handle?.replace('@', '')}`
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-600 dark:text-brand-400 hover:underline bg-brand-500/10 hover:bg-brand-500/20 px-2.5 py-1 rounded-xl transition-all"
+                  title={`Open live ${account.platform} profile`}
+                >
+                  <span>Visit {account.platform}</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              </div>
             </div>
 
             {/* Price Box */}
