@@ -25,8 +25,8 @@ const Navbar = () => {
 
   const isActive = (path) => location.pathname === path;
 
-  // Hide top header on cart, checkout, and profile pages as requested
-  const hideHeader = ['/cart', '/checkout', '/profile'].some((prefix) =>
+  // Hide top header on cart, checkout, profile, and admin pages as requested
+  const hideHeader = ['/cart', '/checkout', '/profile', '/admin'].some((prefix) =>
     location.pathname.startsWith(prefix)
   );
 
@@ -93,6 +93,16 @@ const Navbar = () => {
 
             {isAuthenticated ? (
               <div className="flex items-center gap-2">
+                {user?.role === 'admin' && (
+                  <Link
+                    to="/admin"
+                    id="nav-admin-link"
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-2xl bg-brand-500/10 hover:bg-brand-500/20 text-brand-600 dark:text-brand-400 border border-brand-500/30 text-xs font-bold transition-all cursor-pointer"
+                    title="Open Admin Portal"
+                  >
+                    <span>⚡ Admin</span>
+                  </Link>
+                )}
                 <Link
                   to="/profile"
                   id="nav-profile-link"
@@ -215,23 +225,34 @@ const Navbar = () => {
               {/* Bottom Auth / Profile Section (NO SIGNOUT BUTTON) */}
               <div className="pt-4 border-t border-slate-100 dark:border-white/5 space-y-3">
                 {isAuthenticated ? (
-                  <Link
-                    to="/profile"
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-obsidian-850 hover:bg-slate-100 dark:hover:bg-obsidian-800 text-slate-800 dark:text-slate-200 transition-colors"
-                  >
-                    <div className="w-8 h-8 rounded-full bg-brand-600 text-white flex items-center justify-center font-bold text-xs">
-                      {user?.username ? user.username.charAt(0).toUpperCase() : 'U'}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-xs font-bold text-slate-900 dark:text-white truncate">
-                        {user?.username}
+                  <div className="space-y-2">
+                    {user?.role === 'admin' && (
+                      <Link
+                        to="/admin"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="flex items-center gap-2.5 p-3 rounded-2xl bg-brand-500/10 border border-brand-500/30 text-brand-600 dark:text-brand-400 font-bold text-xs"
+                      >
+                        <span>⚡ Admin Console</span>
+                      </Link>
+                    )}
+                    <Link
+                      to="/profile"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-obsidian-850 hover:bg-slate-100 dark:hover:bg-obsidian-800 text-slate-800 dark:text-slate-200 transition-colors"
+                    >
+                      <div className="w-8 h-8 rounded-full bg-brand-600 text-white flex items-center justify-center font-bold text-xs">
+                        {user?.username ? user.username.charAt(0).toUpperCase() : 'U'}
                       </div>
-                      <div className="text-[10px] text-brand-600 dark:text-brand-400 font-semibold">
-                        View Profile
+                      <div className="flex-1 min-w-0">
+                        <div className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                          {user?.username}
+                        </div>
+                        <div className="text-[10px] text-brand-600 dark:text-brand-400 font-semibold">
+                          View Profile
+                        </div>
                       </div>
-                    </div>
-                  </Link>
+                    </Link>
+                  </div>
                 ) : (
                   <div className="grid grid-cols-2 gap-2">
                     <Link

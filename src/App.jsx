@@ -27,6 +27,7 @@ import TermsPage from './pages/TermsPage';
 import RefundPolicyPage from './pages/RefundPolicyPage';
 import ContactUsPage from './pages/ContactUsPage';
 import AboutUsPage from './pages/AboutUsPage';
+import AdminPage from './pages/AdminPage';
 import NotFoundPage from './pages/NotFoundPage';
 import { useThemeStore } from './store/useThemeStore';
 
@@ -43,7 +44,7 @@ function App() {
   const { theme } = useThemeStore();
   const location = useLocation();
 
-  // Hide footer from accounts, services, internships, checkout, order-success, and cart pages
+  // Hide footer from accounts, services, internships, checkout, order-success, cart, and admin pages
   const hideFooter = [
     '/accounts',
     '/services',
@@ -51,6 +52,7 @@ function App() {
     '/checkout',
     '/order-success',
     '/cart',
+    '/admin',
   ].some((prefix) => location.pathname.startsWith(prefix));
 
   // Apply dark mode class to html element based on store
@@ -89,6 +91,7 @@ function App() {
             <Route path="/about" element={<AboutUsPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
+            <Route path="/admin" element={<AdminPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </ErrorBoundary>

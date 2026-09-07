@@ -278,6 +278,33 @@ const ProfilePage = () => {
         </div>
       </div>
 
+      {/* Admin Panel Quick Card if Administrator */}
+      {currentUser?.role === 'admin' && (
+        <Link
+          to="/admin"
+          id="profile-admin-portal-card"
+          className="p-5 rounded-3xl bg-gradient-to-r from-brand-900/60 via-obsidian-900 to-obsidian-950 border-2 border-brand-500/50 hover:border-brand-500 shadow-xl transition-all flex items-center justify-between group"
+        >
+          <div className="flex items-center gap-3.5">
+            <div className="w-12 h-12 rounded-2xl bg-brand-600 text-white flex items-center justify-center font-black text-xl shadow-lg shadow-brand-600/30">
+              ⚡
+            </div>
+            <div>
+              <div className="text-sm font-bold text-white flex items-center gap-2">
+                <span>Modern Teams Admin Panel</span>
+                <span className="text-[10px] uppercase font-black bg-brand-500 text-white px-2 py-0.5 rounded-full">
+                  Admin
+                </span>
+              </div>
+              <div className="text-xs text-slate-300">
+                Manage orders, approve UPI payments, add products & review internships
+              </div>
+            </div>
+          </div>
+          <ArrowRight className="w-5 h-5 text-brand-400 group-hover:translate-x-1 transition-transform" />
+        </Link>
+      )}
+
       {/* Quick Navigation Cards: My Purchases & Explore Accounts */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Link

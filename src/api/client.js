@@ -87,4 +87,84 @@ export const api = {
     }),
   getOrderById: (id) => request(`/orders/${id}`),
   getMyOrders: (email) => request(`/orders/my-orders${email ? `?email=${encodeURIComponent(email)}` : ''}`),
+
+  // Admin APIs
+  getAllOrders: (params = {}) => {
+    const query = new URLSearchParams();
+    Object.entries(params).forEach(([key, val]) => {
+      if (val !== undefined && val !== null && val !== '') query.append(key, val);
+    });
+    return request(`/orders?${query.toString()}`);
+  },
+  verifyOrderPayment: (id, data) =>
+    request(`/orders/${id}/verify`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+  updateOrderTransfer: (id, data) =>
+    request(`/orders/${id}/transfer`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+  getAdminStats: () => request('/orders/admin/stats'),
+
+  // Admin Products (Accounts)
+  createAccount: (data) =>
+    request('/accounts', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  updateAccount: (id, data) =>
+    request(`/accounts/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+  deleteAccount: (id) =>
+    request(`/accounts/${id}`, {
+      method: 'DELETE',
+    }),
+
+  // Admin Products (Services)
+  createService: (data) =>
+    request('/services', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  updateService: (id, data) =>
+    request(`/services/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+  deleteService: (id) =>
+    request(`/services/${id}`, {
+      method: 'DELETE',
+    }),
+
+  // Admin Internships & Applications
+  createInternship: (data) =>
+    request('/internships', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  updateInternship: (id, data) =>
+    request(`/internships/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+  deleteInternship: (id) =>
+    request(`/internships/${id}`, {
+      method: 'DELETE',
+    }),
+  getAllApplications: (params = {}) => {
+    const query = new URLSearchParams();
+    Object.entries(params).forEach(([key, val]) => {
+      if (val !== undefined && val !== null && val !== '') query.append(key, val);
+    });
+    return request(`/internships/admin/applications?${query.toString()}`);
+  },
+  updateApplicationStatus: (id, data) =>
+    request(`/internships/admin/applications/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
 };

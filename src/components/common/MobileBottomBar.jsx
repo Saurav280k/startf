@@ -11,8 +11,8 @@ const MobileBottomBar = ({ onOpenMenu }) => {
   const { items } = useCartStore();
   const cartCount = items.length;
 
-  // Do not show bottom navbar on cart page as requested
-  if (location.pathname === '/cart') {
+  // Do not show bottom navbar on cart and admin pages
+  if (location.pathname === '/cart' || location.pathname.startsWith('/admin')) {
     return null;
   }
 
