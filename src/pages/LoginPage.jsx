@@ -60,7 +60,7 @@ const LoginPage = () => {
             ▲
           </div>
           <h1 className="text-2xl font-black font-display text-slate-900 dark:text-white">
-            Sign In to Apex
+            Sign In to Modern Teams
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400">
             Access your orders, tracked asset handoffs, and fellowship status.

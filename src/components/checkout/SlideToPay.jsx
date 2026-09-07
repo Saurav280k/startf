@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ArrowRight, Check, ShieldCheck, Lock } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { useCurrencyStore } from '../../store/useCurrencyStore';
 
 const SlideToPay = ({ onConfirm, disabled = false, amount = 0, isSubmitting = false }) => {
+  const { formatAmount } = useCurrencyStore();
   const [dragProgress, setDragProgress] = useState(0); // 0 to 1
   const [isCompleted, setIsCompleted] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -135,7 +137,7 @@ const SlideToPay = ({ onConfirm, disabled = false, amount = 0, isSubmitting = fa
           ) : (
             <span className="text-slate-600 dark:text-slate-300 text-xs sm:text-sm font-semibold tracking-wide flex items-center gap-2">
               <Lock className="w-3.5 h-3.5 text-brand-500" />
-              Slide to Confirm ₹{amount.toLocaleString()}
+              Slide to Confirm {formatAmount(amount)}
             </span>
           )}
         </div>

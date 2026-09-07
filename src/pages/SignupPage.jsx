@@ -22,7 +22,7 @@ const SignupPage = () => {
     onSuccess: (res) => {
       setAuth(res.user, res.token);
       addToast({
-        message: `Welcome to Apex, ${res.user.username}!`,
+        message: `Welcome to Modern Teams, ${res.user.username}!`,
         type: 'success',
       });
       navigate('/');
@@ -77,7 +77,7 @@ const SignupPage = () => {
             ▲
           </div>
           <h1 className="text-2xl font-black font-display text-slate-900 dark:text-white">
-            Create Your Apex Account
+            Create Your Modern Teams Account
           </h1>
           <p className="text-xs text-slate-500 dark:text-slate-400">
             Buy verified accounts, track safe orders, and apply for engineering roles.

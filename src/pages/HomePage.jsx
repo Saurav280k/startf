@@ -21,7 +21,7 @@ import { ShimmerList } from '../components/common/ShimmerCard';
 import { useCurrencyStore } from '../store/useCurrencyStore';
 
 const HomePage = () => {
-  const { formatAmount } = useCurrencyStore();
+  const { currency, formatAmount } = useCurrencyStore();
   const heroRef = useRef(null);
   const headlineRef = useRef(null);
   const cardsFloatRef = useRef(null);
@@ -197,7 +197,7 @@ const HomePage = () => {
         <div className="rounded-3xl p-8 bg-slate-50 dark:bg-obsidian-900/60 border border-slate-200/80 dark:border-white/5 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
           <div>
             <div className="text-3xl sm:text-4xl font-black font-display text-brand-600 dark:text-brand-400">
-              ₹4.8 Cr+
+              {currency === 'USD' ? '$580K+' : '₹4.8 Cr+'}
             </div>
             <div className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-1">
               Safe Transactions Volume
@@ -317,7 +317,7 @@ const HomePage = () => {
                         {tier.tierName}
                       </span>
                       <span className="font-bold text-slate-900 dark:text-white">
-                        From ₹{tier.price}
+                        From {formatAmount(tier.price)}
                       </span>
                     </div>
                   ))}
@@ -349,7 +349,7 @@ const HomePage = () => {
             </h2>
 
             <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
-              Work on production-grade systems in Full Stack, Frontend Animation, Backend Infrastructure, AI/ML, and UI/UX. Competitive monthly stipends ($1,200 - $2,500/mo), flexible hours, and direct PPO conversion tracks.
+              Work on production-grade systems in Full Stack, Frontend Animation, Backend Infrastructure, AI/ML, and UI/UX. Competitive monthly stipends ({currency === 'USD' ? '$1,200 - $2,500 / mo' : '₹20,000 - ₹40,000 / month'}), flexible hours, and direct PPO conversion tracks.
             </p>
 
             <div className="flex flex-wrap gap-4 pt-2">

@@ -2,7 +2,7 @@ import { create } from 'zustand';
 
 const getInitialTheme = () => {
   if (typeof window !== 'undefined') {
-    const stored = localStorage.getItem('apex_theme');
+    const stored = localStorage.getItem('modern_teams_theme') || localStorage.getItem('apex_theme');
     if (stored) return stored;
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   }
@@ -14,7 +14,7 @@ export const useThemeStore = create((set) => ({
   toggleTheme: () =>
     set((state) => {
       const nextTheme = state.theme === 'dark' ? 'light' : 'dark';
-      localStorage.setItem('apex_theme', nextTheme);
+      localStorage.setItem('modern_teams_theme', nextTheme);
       if (nextTheme === 'dark') {
         document.documentElement.classList.add('dark');
       } else {
@@ -23,7 +23,7 @@ export const useThemeStore = create((set) => ({
       return { theme: nextTheme };
     }),
   setTheme: (theme) => {
-    localStorage.setItem('apex_theme', theme);
+    localStorage.setItem('modern_teams_theme', theme);
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');
     } else {

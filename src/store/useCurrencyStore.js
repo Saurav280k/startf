@@ -32,9 +32,11 @@ export const useCurrencyStore = create(
         }
         return num;
       },
+
+      getSymbol: () => (get().currency === 'USD' ? '$' : '₹'),
     }),
     {
-      name: 'apex-currency-preference',
+      name: 'modern-teams-currency',
     }
   )
 );

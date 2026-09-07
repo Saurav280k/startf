@@ -1,12 +1,26 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { Briefcase, MapPin, Clock, ArrowRight, CheckCircle2, Sparkles, IndianRupee } from 'lucide-react';
+import { Briefcase, MapPin, Clock, ArrowRight, CheckCircle2, Sparkles } from 'lucide-react';
 import { api } from '../api/client';
 import { ShimmerList } from '../components/common/ShimmerCard';
+import { useCurrencyStore } from '../store/useCurrencyStore';
 
 const InternshipsPage = () => {
+  const { currency } = useCurrencyStore();
   const [selectedDomain, setSelectedDomain] = useState('All');
+
+  const formatStipend = (stipendStr) => {
+    if (!stipendStr) return '';
+    if (currency === 'USD') {
+      return stipendStr.replace(/₹\s?([\d,]+)/g, (_, match) => {
+        const inr = parseInt(match.replace(/,/g, ''), 10);
+        const usd = Math.round(inr / 85);
+        return `$${usd}`;
+      });
+    }
+    return stipendStr;
+  };
 
   const { data, isLoading } = useQuery({
     queryKey: ['internships', selectedDomain],
@@ -90,7 +104,7 @@ const InternshipsPage = () => {
                   <div className="p-3 rounded-2xl bg-slate-50 dark:bg-obsidian-850 border border-slate-100 dark:border-white/5">
                     <span className="text-[10px] text-slate-400">Monthly Stipend</span>
                     <div className="font-bold text-slate-900 dark:text-white mt-0.5 truncate text-emerald-500">
-                      {role.stipend}
+                      {formatStipend(role.stipend)}
                     </div>
                   </div>
 

@@ -1,14 +1,22 @@
-const API_BASE = '/api';
+const RAW_API_BASE =
+  import.meta.env.API_URL ||
+  import.meta.env.API_BASE_URL ||
+  'https://startb-production.up.railway.app/api';
+
+const API_BASE = RAW_API_BASE.replace(/\/+$/, '');
 
 async function request(endpoint, options = {}) {
-  const token = localStorage.getItem('apex_token');
+  const token =
+    localStorage.getItem('modern_teams_token') ||
+    localStorage.getItem('apex_token');
   const headers = {
     'Content-Type': 'application/json',
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...options.headers,
   };
 
-  const response = await fetch(`${API_BASE}${endpoint}`, {
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  const response = await fetch(`${API_BASE}${cleanEndpoint}`, {
     ...options,
     headers,
   });

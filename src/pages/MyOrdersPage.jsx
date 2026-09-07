@@ -13,10 +13,12 @@ import {
 } from 'lucide-react';
 import { api } from '../api/client';
 import { useAuthStore } from '../store/useAuthStore';
+import { useCurrencyStore } from '../store/useCurrencyStore';
 import { ShimmerList } from '../components/common/ShimmerCard';
 
 const MyOrdersPage = () => {
   const { user, isAuthenticated } = useAuthStore();
+  const { formatAmount } = useCurrencyStore();
   const [lookupEmail, setLookupEmail] = useState(user?.email || '');
   const [queriedEmail, setQueriedEmail] = useState(user?.email || '');
 
@@ -124,7 +126,7 @@ const MyOrdersPage = () => {
 
                 <div>
                   <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                    {ord.itemSnapshot?.title || 'Apex Digital Asset'}
+                    {ord.itemSnapshot?.title || 'Modern Teams Digital Asset'}
                   </h3>
                   <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 dark:text-slate-400 mt-1">
                     <span>
@@ -152,14 +154,14 @@ const MyOrdersPage = () => {
                 <div className="text-left md:text-right">
                   <div className="text-[10px] text-slate-400 uppercase font-bold">Total Paid</div>
                   <div className="text-xl font-black font-display text-slate-900 dark:text-white">
-                    ₹{ord.amount.toLocaleString()}
+                    {formatAmount(ord.amount)}
                   </div>
                 </div>
 
                 <div className="flex gap-2">
                   <a
                     href={`https://wa.me/919876543210?text=${encodeURIComponent(
-                      `Hi Apex Support, I am tracking my order ${ord.orderNumber}.`
+                      `Hi Modern Teams Support, I am tracking my order ${ord.orderNumber}.`
                     )}`}
                     target="_blank"
                     rel="noreferrer"

@@ -23,7 +23,7 @@ const ContactUsPage = () => {
   };
 
   const openWhatsApp = () => {
-    const text = 'Hi Apex Support, I have an inquiry.';
+    const text = 'Hi Modern Teams Support, I have an inquiry.';
     window.open(`https://wa.me/919876543210?text=${encodeURIComponent(text)}`, '_blank');
   };
 
@@ -81,7 +81,7 @@ const ContactUsPage = () => {
               </div>
               <div>
                 <h4 className="text-xs text-slate-400 font-bold uppercase">Official Support Email</h4>
-                <div className="text-sm font-bold text-slate-900 dark:text-white">support@apexdigital.in</div>
+                <div className="text-sm font-bold text-slate-900 dark:text-white">support@modernteams.in</div>
               </div>
             </div>
           </div>

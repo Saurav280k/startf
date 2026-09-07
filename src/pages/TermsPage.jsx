@@ -32,7 +32,7 @@ const TermsPage = () => {
             1. Account Purchase & Ownership
           </h2>
           <p>
-            When purchasing a verified social media account or channel on Apex, the buyer receives 100% full ownership, including login username, password, and original recovery email (OGE).
+            When purchasing a verified social media account or channel on Modern Teams, the buyer receives 100% full ownership, including login username, password, and original recovery email (OGE).
           </p>
         </div>
 

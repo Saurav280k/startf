@@ -15,11 +15,13 @@ import {
 import confetti from 'canvas-confetti';
 import { api } from '../api/client';
 import { useToastStore } from '../store/useToastStore';
+import { useCurrencyStore } from '../store/useCurrencyStore';
 
 const OrderSuccessPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToast } = useToastStore();
+  const { formatAmount } = useCurrencyStore();
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['order', id],
@@ -130,7 +132,7 @@ const OrderSuccessPage = () => {
               Paid Amount
             </span>
             <div className="text-2xl font-black font-display text-emerald-500 mt-0.5">
-              ₹{order.amount.toLocaleString('en-IN')} INR
+              {formatAmount(order.amount)}
             </div>
           </div>
         </div>
@@ -222,7 +224,7 @@ const OrderSuccessPage = () => {
         <div className="pt-4 border-t border-slate-100 dark:border-white/5 flex flex-wrap gap-3">
           <a
             href={`https://wa.me/919876543210?text=${encodeURIComponent(
-              `Hi Apex Support, I have submitted UPI payment for order ${order.orderNumber} (UTR: ${order.upiTransactionId}). Please verify and transfer details.`
+              `Hi Modern Teams Support, I have submitted UPI payment for order ${order.orderNumber} (UTR: ${order.upiTransactionId}). Please verify and transfer details.`
             )}`}
             target="_blank"
             rel="noreferrer"

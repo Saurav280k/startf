@@ -14,7 +14,7 @@ const Footer = () => {
                 ▲
               </div>
               <span className="text-lg font-black font-display tracking-tight text-slate-900 dark:text-white">
-                APEX DIGITAL
+                MODERN TEAMS
               </span>
             </Link>
             <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
@@ -103,7 +103,7 @@ const Footer = () => {
 
         {/* Bottom copyright and legal page links */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-400">
-          <p>© {new Date().getFullYear()} APEX Digital Marketplace. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Modern Teams. All rights reserved.</p>
           <div className="flex flex-wrap items-center gap-5">
             <Link to="/about" className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors">
               About Us

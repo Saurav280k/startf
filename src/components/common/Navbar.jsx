@@ -42,7 +42,7 @@ const Navbar = () => {
             </div>
             <div className="flex flex-col">
               <span className="text-xl font-black font-display tracking-tight text-slate-900 dark:text-white">
-                APEX
+                Modern Teams
               </span>
               <span className="text-[10px] text-slate-500 font-medium tracking-wider uppercase">
                 Digital Assets & Services
@@ -159,7 +159,7 @@ const Navbar = () => {
                       ▲
                     </div>
                     <span className="text-lg font-black font-display text-slate-900 dark:text-white">
-                      APEX
+                      Modern Teams
                     </span>
                   </Link>
                   <button

@@ -23,7 +23,7 @@ const WhatsAppButton = () => {
   ];
 
   const handleSend = (text) => {
-    const messageToSend = text || customMsg || 'Hello! I have an inquiry regarding Apex Marketplace.';
+    const messageToSend = text || customMsg || 'Hello! I have an inquiry regarding Modern Teams.';
     const encoded = encodeURIComponent(messageToSend);
     const url = `https://wa.me/${WHATSAPP_PHONE}?text=${encoded}`;
     window.open(url, '_blank', 'noopener,noreferrer');
@@ -41,7 +41,7 @@ const WhatsAppButton = () => {
                 <MessageCircle className="w-4 h-4" />
               </div>
               <div>
-                <h4 className="text-xs font-bold text-slate-900 dark:text-white">Apex WhatsApp Desk</h4>
+                <h4 className="text-xs font-bold text-slate-900 dark:text-white">Modern Teams WhatsApp Desk</h4>
                 <div className="flex items-center gap-1.5 text-[10px] text-emerald-500">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                   <span>Online • Avg reply &lt; 5m</span>

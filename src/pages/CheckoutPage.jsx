@@ -313,7 +313,7 @@ const CheckoutPage = () => {
   }
 
   // Dynamic UPI URL for QR generation
-  const upiIntentString = `upi://pay?pa=${UPI_ID}&pn=ApexMarketplace&am=${amount}&cu=INR&tn=Order_${itemType}`;
+  const upiIntentString = `upi://pay?pa=${UPI_ID}&pn=ModernTeams&am=${amount}&cu=INR&tn=Order_${itemType}`;
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(upiIntentString)}`;
 
   return (
@@ -345,7 +345,7 @@ const CheckoutPage = () => {
             </div>
             <div>
               <h1 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <span>Apex Payment Gateway</span>
+                <span>Modern Teams Payment Gateway</span>
                 <span className="text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full">
                   Secure
                 </span>
@@ -526,11 +526,11 @@ const CheckoutPage = () => {
                     <div>
                       <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Amount to Pay</span>
                       <div className="text-xl sm:text-2xl font-black font-display text-slate-900 dark:text-white">
-                        ₹{amount.toLocaleString('en-IN')}
+                        {formatAmount(amount)}
                       </div>
                       {currency === 'USD' && (
                         <span className="text-[11px] text-slate-400 font-mono">
-                          (Billed as {formatAmount(amount)})
+                          (UPI INR equivalent: ₹{amount.toLocaleString('en-IN')})
                         </span>
                       )}
                     </div>

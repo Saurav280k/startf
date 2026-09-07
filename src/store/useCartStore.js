@@ -41,7 +41,20 @@ export const useCartStore = create(
       },
     }),
     {
-      name: 'apex-cart-storage',
+      name: 'modern-teams-cart-storage',
+      onRehydrateStorage: () => (state) => {
+        if (!state?.items?.length) {
+          try {
+            const legacy = localStorage.getItem('apex-cart-storage');
+            if (legacy) {
+              const parsed = JSON.parse(legacy);
+              if (parsed?.state?.items?.length) {
+                state.items = parsed.state.items;
+              }
+            }
+          } catch (e) {}
+        }
+      },
     }
   )
 );

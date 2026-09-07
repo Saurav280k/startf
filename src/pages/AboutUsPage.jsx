@@ -17,7 +17,7 @@ const AboutUsPage = () => {
 
       <div className="space-y-3">
         <span className="text-xs font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400 bg-brand-500/10 px-3 py-1 rounded-full">
-          About Apex
+          About Modern Teams
         </span>
         <h1 className="text-3xl sm:text-4xl font-black font-display text-slate-900 dark:text-white">
           The World's Most Trusted Digital Properties Marketplace

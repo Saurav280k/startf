@@ -438,7 +438,7 @@ const ProfilePage = () => {
           className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 font-bold text-xs border border-red-500/20 transition-all cursor-pointer hover:scale-105"
         >
           <LogOut className="w-4 h-4" />
-          <span>Sign Out of Apex</span>
+          <span>Sign Out of Modern Teams</span>
         </button>
       </div>
     </div>

@@ -85,7 +85,7 @@ const AccountDetailPage = () => {
   };
 
   const handleWhatsAppInquiry = () => {
-    const text = `Hi Apex, I want to know more about this account: ${account?.title} (${account?.handle}) listed for ₹${account?.price?.toLocaleString('en-IN')}.`;
+    const text = `Hi Modern Teams, I want to know more about this account: ${account?.title} (${account?.handle}) listed for ${formatAmount(account?.price)}.`;
     window.open(
       `https://wa.me/919876543210?text=${encodeURIComponent(text)}`,
       '_blank',

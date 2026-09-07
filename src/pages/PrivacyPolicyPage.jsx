@@ -32,7 +32,7 @@ const PrivacyPolicyPage = () => {
             1. Information We Collect
           </h2>
           <p>
-            When you use Apex Digital, we collect your contact email, phone number, and destination transfer email solely to fulfill your account transfer, delivery, and internship application review.
+            When you use Modern Teams, we collect your contact email, phone number, and destination transfer email solely to fulfill your account transfer, delivery, and internship application review.
           </p>
         </div>
 
