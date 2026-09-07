@@ -23,12 +23,22 @@ const OrderSuccessPage = () => {
   const { addToast } = useToastStore();
   const { formatAmount } = useCurrencyStore();
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: ['order', id],
     queryFn: () => api.getOrderById(id),
+    refetchInterval: 2500, // Poll every 2.5 seconds for instant admin updates
   });
 
   const order = data?.order;
+
+  const isPaymentApproved =
+    order?.verificationStatus === 'Approved & Verified' || order?.paymentStatus === 'completed';
+  const isPaymentRejected =
+    order?.verificationStatus === 'Rejected' || order?.paymentStatus === 'failed';
+  const isCredentialsSent =
+    order?.transferStatus === 'Credentials Sent to Email' || order?.transferStatus === 'Transfer Complete';
+  const isTransferComplete =
+    order?.transferStatus === 'Transfer Complete';
 
   useEffect(() => {
     try {
@@ -83,26 +93,85 @@ const OrderSuccessPage = () => {
           <ArrowLeft className="w-4 h-4" />
           <span>View All My Orders</span>
         </Link>
-        <span className="text-xs font-bold text-emerald-500 bg-emerald-500/10 px-3 py-1 rounded-full flex items-center gap-1.5">
-          <ShieldCheck className="w-3.5 h-3.5" />
-          100% Safe Buyer Guarantee
-        </span>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              refetch();
+              addToast({ message: 'Order status refreshed.', type: 'info' });
+            }}
+            disabled={isFetching}
+            className="text-xs font-semibold text-slate-400 hover:text-brand-600 dark:hover:text-brand-400 p-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-obsidian-800 transition-colors flex items-center gap-1 cursor-pointer"
+            title="Refresh order status"
+          >
+            <Clock className={`w-3.5 h-3.5 ${isFetching ? 'animate-spin text-brand-600' : ''}`} />
+            <span className="hidden sm:inline">Refresh</span>
+          </button>
+          <span className="text-xs font-bold text-emerald-500 bg-emerald-500/10 px-3 py-1 rounded-full flex items-center gap-1.5">
+            <ShieldCheck className="w-3.5 h-3.5" />
+            100% Safe Buyer Guarantee
+          </span>
+        </div>
       </div>
 
       {/* Success Badge & Headline */}
       <div className="text-center space-y-3">
-        <div className="w-20 h-20 rounded-3xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center mx-auto shadow-xl shadow-emerald-500/10">
+        <div className={`w-20 h-20 rounded-3xl flex items-center justify-center mx-auto shadow-xl ${
+          isPaymentRejected
+            ? 'bg-red-500/10 text-red-500 shadow-red-500/10'
+            : isPaymentApproved
+            ? 'bg-emerald-500/10 text-emerald-500 shadow-emerald-500/10'
+            : 'bg-amber-500/10 text-amber-500 shadow-amber-500/10'
+        }`}>
           <CheckCircle2 className="w-10 h-10" />
         </div>
-        <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-400 text-xs font-bold uppercase tracking-wider">
-          <Clock className="w-3.5 h-3.5" />
-          {order.verificationStatus || 'Pending Admin Approval'}
+
+        <div className="flex items-center justify-center gap-2">
+          <span
+            className={`inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
+              isPaymentApproved
+                ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'
+                : isPaymentRejected
+                ? 'bg-red-500/10 text-red-500 border border-red-500/20'
+                : 'bg-amber-500/10 text-amber-500 border border-amber-500/20 animate-pulse'
+            }`}
+          >
+            <Clock className="w-3.5 h-3.5" />
+            {isPaymentApproved
+              ? 'Payment Approved & Verified'
+              : isPaymentRejected
+              ? 'Payment Verification Rejected'
+              : (order.verificationStatus || 'Pending Admin Approval')}
+          </span>
+
+          {order.transferStatus && (
+            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 dark:bg-obsidian-850 text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-white/5">
+              {order.transferStatus}
+            </span>
+          )}
         </div>
+
         <h1 className="text-3xl sm:text-4xl font-black font-display text-slate-950 dark:text-white">
-          Payment Details Submitted!
+          {isTransferComplete
+            ? 'Asset Handoff Complete!'
+            : isCredentialsSent
+            ? 'Credentials Sent to Your Email!'
+            : isPaymentApproved
+            ? 'Payment Verified & Approved!'
+            : isPaymentRejected
+            ? 'Payment Verification Issue'
+            : 'Payment Details Submitted!'}
         </h1>
         <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-lg mx-auto leading-relaxed">
-          Your UPI payment has been received. Our team will verify your 12-digit transaction UTR and transfer your account details within 1-2 hours.
+          {isTransferComplete
+            ? 'The account credentials have been verified and transferred. You now have full ownership.'
+            : isCredentialsSent
+            ? `Your login credentials and security details have been sent to ${order.transferDestinationEmail}. Please check your inbox.`
+            : isPaymentApproved
+            ? `Your payment has been verified by the admin team! Credentials are being prepared for dispatch to ${order.transferDestinationEmail}.`
+            : isPaymentRejected
+            ? 'Your payment could not be verified automatically. Please contact support via WhatsApp with your UPI screenshot.'
+            : 'Your UPI payment has been received. Our team will verify your 12-digit transaction UTR and transfer your account details within 1-2 hours.'}
         </p>
       </div>
 
@@ -120,7 +189,8 @@ const OrderSuccessPage = () => {
               </span>
               <button
                 onClick={() => copyToClipboard(order.orderNumber)}
-                className="p-1 rounded-md text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                className="p-1 rounded-md text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                title="Copy Order Number"
               >
                 <Copy className="w-3.5 h-3.5" />
               </button>
@@ -129,28 +199,29 @@ const OrderSuccessPage = () => {
 
           <div className="text-right">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-              Paid Amount
+              Total Amount
             </span>
-            <div className="text-2xl font-black font-display text-emerald-500 mt-0.5">
+            <div className="text-2xl font-black font-display text-slate-900 dark:text-white mt-1">
               {formatAmount(order.amount)}
             </div>
           </div>
         </div>
 
         {/* Transfer Destination Highlight Box */}
-        <div className="p-5 rounded-2xl bg-blue-50/80 dark:bg-blue-950/40 border-2 border-blue-500/50 dark:border-blue-500/70 space-y-2.5 shadow-sm shadow-blue-500/10">
-          <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-bold text-xs">
-            <div className="w-6 h-6 rounded-lg bg-blue-500/15 dark:bg-blue-500/25 flex items-center justify-center text-blue-600 dark:text-blue-400">
-              <Mail className="w-3.5 h-3.5" />
-            </div>
-            <span className="uppercase tracking-wider">Account Details Delivery Email</span>
-          </div>
-          <div className="text-base sm:text-lg font-mono font-bold text-slate-900 dark:text-white pl-0.5">
-            {order.transferDestinationEmail}
+        <div className="p-4 rounded-2xl bg-slate-50 dark:bg-obsidian-850 border border-slate-200/60 dark:border-white/5 space-y-2">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-slate-500 dark:text-slate-400 font-medium">
+              Credentials Destination:
+            </span>
+            <span className="font-mono font-bold text-brand-600 dark:text-brand-400">
+              {order.transferDestinationEmail}
+            </span>
           </div>
           <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">
             Your login username, password, and security codes will be delivered to this email within{' '}
-            <span className="font-semibold text-slate-900 dark:text-white">{order.transferEta || '1 - 2 Hours'}</span>.
+            <span className="font-semibold text-slate-900 dark:text-white">
+              {order.transferEta || '1 - 2 Hours'}
+            </span>.
           </p>
         </div>
 
@@ -162,8 +233,20 @@ const OrderSuccessPage = () => {
               {order.upiTransactionId || 'Under verification'}
             </span>
           </div>
-          <span className="px-3 py-1 rounded-full text-[11px] font-bold bg-amber-500/10 text-amber-500">
-            {order.verificationStatus || 'Pending Admin Approval'}
+          <span
+            className={`px-3 py-1 rounded-full text-[11px] font-bold ${
+              isPaymentApproved
+                ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'
+                : isPaymentRejected
+                ? 'bg-red-500/10 text-red-500 border border-red-500/20'
+                : 'bg-amber-500/10 text-amber-500 border border-amber-500/20 animate-pulse'
+            }`}
+          >
+            {isPaymentApproved
+              ? 'Payment Approved & Verified'
+              : isPaymentRejected
+              ? 'Payment Rejected'
+              : (order.verificationStatus || 'Pending Admin Approval')}
           </span>
         </div>
 
@@ -173,49 +256,142 @@ const OrderSuccessPage = () => {
             Handoff Progress Tracker
           </h4>
           <div className="space-y-2.5">
+            {/* Step 1: Payment Verification */}
             <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-obsidian-850">
-              <div className="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-bold text-xs shrink-0">
-                ✓
+              <div
+                className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${
+                  isPaymentRejected
+                    ? 'bg-red-500 text-white'
+                    : isPaymentApproved
+                    ? 'bg-emerald-500 text-white'
+                    : 'bg-amber-500 text-white animate-pulse'
+                }`}
+              >
+                {isPaymentRejected ? '✕' : isPaymentApproved ? '✓' : '1'}
               </div>
               <div className="flex-1">
                 <div className="text-xs font-bold text-slate-900 dark:text-white">
-                  Payment Submitted by Buyer
-                </div>
-                <div className="text-[11px] text-slate-400">UTR: {order.upiTransactionId}</div>
-              </div>
-              <span className="text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full">
-                Submitted
-              </span>
-            </div>
-
-            <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-obsidian-850">
-              <div className="w-8 h-8 rounded-xl bg-brand-600 text-white flex items-center justify-center font-bold text-xs shrink-0 animate-pulse">
-                2
-              </div>
-              <div className="flex-1">
-                <div className="text-xs font-bold text-slate-900 dark:text-white">
-                  Admin Verification & Credentials Dispatch
+                  {isPaymentRejected
+                    ? 'Payment Verification Rejected'
+                    : isPaymentApproved
+                    ? 'Payment Verified & Approved'
+                    : 'Payment Submitted by Buyer'}
                 </div>
                 <div className="text-[11px] text-slate-400">
-                  Sending details to {order.transferDestinationEmail}
+                  {isPaymentApproved
+                    ? `UTR: ${order.upiTransactionId} — Approved by Admin`
+                    : isPaymentRejected
+                    ? `UTR: ${order.upiTransactionId} — Invalid or rejected`
+                    : `UTR: ${order.upiTransactionId}`}
                 </div>
               </div>
-              <span className="text-[10px] font-bold text-brand-600 dark:text-brand-400 bg-brand-500/10 px-2 py-0.5 rounded-full">
-                In Progress
+              <span
+                className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                  isPaymentRejected
+                    ? 'text-red-500 bg-red-500/10'
+                    : isPaymentApproved
+                    ? 'text-emerald-500 bg-emerald-500/10'
+                    : 'text-amber-500 bg-amber-500/10'
+                }`}
+              >
+                {isPaymentRejected ? 'Rejected' : isPaymentApproved ? 'Approved' : 'Submitted'}
               </span>
             </div>
 
-            <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-obsidian-850 opacity-60">
-              <div className="w-8 h-8 rounded-xl bg-slate-300 dark:bg-obsidian-700 text-slate-600 dark:text-slate-300 flex items-center justify-center font-bold text-xs shrink-0">
-                3
+            {/* Step 2: Credentials Dispatch */}
+            <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-obsidian-850">
+              <div
+                className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${
+                  isCredentialsSent
+                    ? 'bg-emerald-500 text-white'
+                    : isPaymentApproved
+                    ? 'bg-brand-600 text-white animate-pulse'
+                    : 'bg-slate-300 dark:bg-obsidian-700 text-slate-600 dark:text-slate-300'
+                }`}
+              >
+                {isCredentialsSent ? '✓' : '2'}
               </div>
               <div className="flex-1">
                 <div className="text-xs font-bold text-slate-900 dark:text-white">
-                  Buyer Verification & Order Complete
+                  {isCredentialsSent
+                    ? 'Credentials Sent to Email'
+                    : isPaymentApproved
+                    ? 'Admin Preparing Credentials Dispatch'
+                    : 'Admin Verification & Credentials Dispatch'}
                 </div>
-                <div className="text-[11px] text-slate-400">Log in, change password, and enjoy your new account</div>
+                <div className="text-[11px] text-slate-400">
+                  {isCredentialsSent
+                    ? `Sent to ${order.transferDestinationEmail}`
+                    : isPaymentApproved
+                    ? `Preparing transfer to ${order.transferDestinationEmail}`
+                    : `Awaiting payment approval`}
+                </div>
               </div>
-              <span className="text-[10px] font-bold text-slate-400">Next Step</span>
+              <span
+                className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                  isCredentialsSent
+                    ? 'text-emerald-500 bg-emerald-500/10'
+                    : isPaymentApproved
+                    ? 'text-brand-600 dark:text-brand-400 bg-brand-500/10 animate-pulse'
+                    : 'text-slate-400 bg-slate-100 dark:bg-white/5'
+                }`}
+              >
+                {isCredentialsSent
+                  ? 'Sent'
+                  : isPaymentApproved
+                  ? 'In Progress'
+                  : 'Pending'}
+              </span>
+            </div>
+
+            {/* Step 3: Order Complete */}
+            <div
+              className={`flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-obsidian-850 ${
+                isTransferComplete ? '' : isCredentialsSent ? '' : 'opacity-60'
+              }`}
+            >
+              <div
+                className={`w-8 h-8 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${
+                  isTransferComplete
+                    ? 'bg-emerald-500 text-white'
+                    : isCredentialsSent
+                    ? 'bg-amber-500 text-white animate-pulse'
+                    : 'bg-slate-300 dark:bg-obsidian-700 text-slate-600 dark:text-slate-300'
+                }`}
+              >
+                {isTransferComplete ? '✓' : '3'}
+              </div>
+              <div className="flex-1">
+                <div className="text-xs font-bold text-slate-900 dark:text-white">
+                  {isTransferComplete
+                    ? 'Buyer Verification & Order Complete'
+                    : isCredentialsSent
+                    ? 'Verify Login & Change Password'
+                    : 'Buyer Verification & Order Complete'}
+                </div>
+                <div className="text-[11px] text-slate-400">
+                  {isTransferComplete
+                    ? 'All credentials transferred. Order marked complete!'
+                    : isCredentialsSent
+                    ? `Check inbox at ${order.transferDestinationEmail} to log in`
+                    : 'Log in, change password, and enjoy your new account'}
+                </div>
+              </div>
+              <span
+                className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                  isTransferComplete
+                    ? 'text-emerald-500 bg-emerald-500/10'
+                    : isCredentialsSent
+                    ? 'text-amber-500 bg-amber-500/10'
+                    : 'text-slate-400'
+                }`}
+              >
+                {isTransferComplete
+                  ? 'Complete'
+                  : isCredentialsSent
+                  ? 'Action Required'
+                  : 'Next Step'}
+              </span>
             </div>
           </div>
         </div>

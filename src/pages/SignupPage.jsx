@@ -5,6 +5,7 @@ import { User, Mail, Lock, Phone, ArrowRight, ShieldCheck, Check } from 'lucide-
 import { api } from '../api/client';
 import { useAuthStore } from '../store/useAuthStore';
 import { useToastStore } from '../store/useToastStore';
+import GoogleAuthButton from '../components/auth/GoogleAuthButton';
 
 const SignupPage = () => {
   const navigate = useNavigate();
@@ -82,6 +83,19 @@ const SignupPage = () => {
           <p className="text-xs text-slate-500 dark:text-slate-400">
             Buy verified accounts, track safe orders, and apply for engineering roles.
           </p>
+        </div>
+
+        {/* Google One-Click Sign Up */}
+        <div className="space-y-4">
+          <GoogleAuthButton mode="signup" />
+
+          <div className="flex items-center gap-3">
+            <div className="flex-1 h-px bg-slate-200 dark:bg-white/10" />
+            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+              Or with email
+            </span>
+            <div className="flex-1 h-px bg-slate-200 dark:bg-white/10" />
+          </div>
         </div>
 
         {/* Form */}

@@ -5,6 +5,7 @@ import { Mail, Lock, ArrowRight, ShieldCheck } from 'lucide-react';
 import { api } from '../api/client';
 import { useAuthStore } from '../store/useAuthStore';
 import { useToastStore } from '../store/useToastStore';
+import GoogleAuthButton from '../components/auth/GoogleAuthButton';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -65,6 +66,19 @@ const LoginPage = () => {
           <p className="text-xs text-slate-500 dark:text-slate-400">
             Access your orders, tracked asset handoffs, and fellowship status.
           </p>
+        </div>
+
+        {/* Google One-Click Auth */}
+        <div className="space-y-4">
+          <GoogleAuthButton mode="signin" />
+
+          <div className="flex items-center gap-3">
+            <div className="flex-1 h-px bg-slate-200 dark:bg-white/10" />
+            <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+              Or with email
+            </span>
+            <div className="flex-1 h-px bg-slate-200 dark:bg-white/10" />
+          </div>
         </div>
 
         {/* Form */}

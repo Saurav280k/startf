@@ -29,6 +29,7 @@ import ContactUsPage from './pages/ContactUsPage';
 import AboutUsPage from './pages/AboutUsPage';
 import AdminPage from './pages/AdminPage';
 import NotFoundPage from './pages/NotFoundPage';
+import AdminRoute from './components/common/AdminRoute';
 import { useThemeStore } from './store/useThemeStore';
 
 // Scroll to top on route change
@@ -91,7 +92,14 @@ function App() {
             <Route path="/about" element={<AboutUsPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
-            <Route path="/admin" element={<AdminPage />} />
+            <Route
+              path="/admin"
+              element={
+                <AdminRoute>
+                  <AdminPage />
+                </AdminRoute>
+              }
+            />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </ErrorBoundary>

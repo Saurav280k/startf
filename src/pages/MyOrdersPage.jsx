@@ -26,6 +26,7 @@ const MyOrdersPage = () => {
     queryKey: ['my-orders', queriedEmail],
     queryFn: () => api.getMyOrders(queriedEmail),
     enabled: isAuthenticated || !!queriedEmail,
+    refetchInterval: 3000,
   });
 
   const orders = data?.orders || [];
@@ -118,10 +119,32 @@ const MyOrdersPage = () => {
                       day: 'numeric',
                     })}
                   </span>
-                  <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-500 flex items-center gap-1">
+                  <span
+                    className={`text-xs font-bold px-2.5 py-0.5 rounded-full flex items-center gap-1 ${
+                      ord.verificationStatus === 'Approved & Verified'
+                        ? 'bg-emerald-500/10 text-emerald-500'
+                        : ord.verificationStatus === 'Rejected'
+                        ? 'bg-red-500/10 text-red-500'
+                        : 'bg-amber-500/10 text-amber-500'
+                    }`}
+                  >
                     <ShieldCheck className="w-3 h-3" />
                     {ord.verificationStatus || 'Pending Admin Approval'}
                   </span>
+
+                  {ord.transferStatus && (
+                    <span
+                      className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
+                        ord.transferStatus === 'Transfer Complete'
+                          ? 'bg-emerald-500/10 text-emerald-500'
+                          : ord.transferStatus === 'Credentials Sent to Email'
+                          ? 'bg-blue-500/10 text-blue-500'
+                          : 'bg-slate-100 dark:bg-obsidian-850 text-slate-500'
+                      }`}
+                    >
+                      {ord.transferStatus}
+                    </span>
+                  )}
                 </div>
 
                 <div>

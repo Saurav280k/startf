@@ -123,13 +123,6 @@ const AdminPage = () => {
 
   const isAdmin = isAuthenticated && user?.role === 'admin';
 
-  // Quick fill helper for demo credentials
-  const fillDemoCredentials = () => {
-    setLoginEmail('admin@modernteams.com');
-    setLoginPassword('Admin@2026');
-    addToast({ message: 'Admin demo credentials filled! Click Sign In.', type: 'info' });
-  };
-
   const handleAdminLogin = async (e) => {
     e.preventDefault();
     if (!loginEmail || !loginPassword) {
@@ -446,28 +439,6 @@ const AdminPage = () => {
             <p className="text-xs text-slate-500 dark:text-slate-400">
               Restricted management area. Authenticate with your administrator credentials.
             </p>
-          </div>
-
-          {/* Quick 1-Click Demo Credentials Card */}
-          <div className="p-4 rounded-2xl bg-brand-500/10 border border-brand-500/20 space-y-2">
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-bold text-brand-600 dark:text-brand-400 flex items-center gap-1.5">
-                <Lock className="w-3.5 h-3.5" />
-                <span>Admin Credentials Ready</span>
-              </span>
-              <button
-                type="button"
-                onClick={fillDemoCredentials}
-                id="fill-admin-credentials-btn"
-                className="px-2.5 py-1 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold text-[11px] transition-all cursor-pointer shadow-sm active:scale-95"
-              >
-                1-Click Fill
-              </button>
-            </div>
-            <div className="text-[11px] font-mono text-slate-600 dark:text-slate-300 space-y-0.5">
-              <div>Email: <span className="font-bold text-slate-900 dark:text-white">admin@modernteams.com</span></div>
-              <div>Password: <span className="font-bold text-slate-900 dark:text-white">Admin@2026</span></div>
-            </div>
           </div>
 
           {/* Login Form */}
