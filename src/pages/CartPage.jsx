@@ -40,7 +40,7 @@ const CartPage = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8 pb-28">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 pb-24">
       {/* Top Navigation */}
       <div className="flex items-center justify-between">
         <Link
@@ -50,9 +50,9 @@ const CartPage = () => {
           <ArrowLeft className="w-4 h-4" />
           <span>Continue Shopping</span>
         </Link>
-        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold">
+        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold border border-emerald-500/20">
           <ShieldCheck className="w-4 h-4" />
-          <span>100% Safe Buyer Protection</span>
+          <span>Escrow Buyer Protection</span>
         </div>
       </div>
 

@@ -21,18 +21,6 @@ const MobileBottomBar = ({ onOpenMenu }) => {
     return location.pathname.startsWith(path);
   };
 
-  const handleSearchClick = (e) => {
-    // Navigate to accounts page with searchFocus param and focus input
-    navigate(`/accounts?searchFocus=${Date.now()}`);
-    setTimeout(() => {
-      const searchInput = document.getElementById('accounts-search-input');
-      if (searchInput) {
-        searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        searchInput.focus();
-      }
-    }, 100);
-  };
-
   const navItems = [
     {
       id: 'mobile-tab-home',
@@ -45,9 +33,8 @@ const MobileBottomBar = ({ onOpenMenu }) => {
       id: 'mobile-tab-search',
       label: 'Search',
       icon: Search,
-      to: '/accounts?searchFocus=true',
+      to: '/accounts',
       active: isActive('/accounts'),
-      onClick: handleSearchClick,
     },
     {
       id: 'mobile-tab-cart',

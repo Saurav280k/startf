@@ -1,10 +1,11 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { Search, Filter, CheckCircle2, SlidersHorizontal, RefreshCw, X } from 'lucide-react';
 import { api } from '../api/client';
 import AccountCard from '../components/accounts/AccountCard';
 import { ShimmerList } from '../components/common/ShimmerCard';
+import CatalogNavTabs from '../components/common/CatalogNavTabs';
 
 const AccountsPage = () => {
   const [searchParams] = useSearchParams();
@@ -16,25 +17,12 @@ const AccountsPage = () => {
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState('newest');
 
-  // Auto-scroll and focus search bar when triggered from bottom navbar or URL
-  useEffect(() => {
-    if (searchParams.get('searchFocus')) {
-      const timer = setTimeout(() => {
-        if (searchInputRef.current) {
-          searchInputRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          searchInputRef.current.focus();
-        }
-      }, 150);
-      return () => clearTimeout(timer);
-    }
-  }, [searchParams]);
-
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['accounts', { platform, niche, verifiedOnly, search, sort }],
     queryFn: () =>
       api.getAccounts({
-        platform,
-        niche,
+        platform: platform === 'All' ? '' : platform,
+        niche: niche === 'All' ? '' : niche,
         verified: verifiedOnly ? 'true' : '',
         search,
         sort,
@@ -53,13 +41,16 @@ const AccountsPage = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
+      {/* Universal Catalog Switcher: Accounts | Services | Internships */}
+      <CatalogNavTabs />
+
       {/* Header */}
-      <div className="space-y-3">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-400 text-xs font-bold uppercase tracking-wider">
+      <div className="space-y-1.5">
+        <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-400 text-xs font-bold uppercase tracking-wider">
           Digital Assets Exchange
         </div>
-        <h1 className="text-3xl sm:text-4xl font-black font-display text-slate-950 dark:text-white">
+        <h1 className="text-2xl sm:text-3xl font-black font-display text-slate-950 dark:text-white">
           Verified Social Media Properties
         </h1>
       </div>

@@ -89,6 +89,11 @@ export const api = {
     }),
   getOrderById: (id) => request(`/orders/${id}`),
   getMyOrders: (email) => request(`/orders/my-orders${email ? `?email=${encodeURIComponent(email)}` : ''}`),
+  requestRefund: (id, data) =>
+    request(`/orders/${id}/refund`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
 
   // Admin APIs
   getAllOrders: (params = {}) => {
@@ -100,6 +105,20 @@ export const api = {
   },
   verifyOrderPayment: (id, data) =>
     request(`/orders/${id}/verify`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+  dispatchCredentials: (id, data) =>
+    request(`/orders/${id}/dispatch-credentials`, {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    }),
+  completeHandoff: (id) =>
+    request(`/orders/${id}/complete-handoff`, {
+      method: 'PUT',
+    }),
+  updateRefundStatus: (id, data) =>
+    request(`/orders/${id}/refund-status`, {
       method: 'PUT',
       body: JSON.stringify(data),
     }),

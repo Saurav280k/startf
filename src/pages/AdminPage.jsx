@@ -40,6 +40,10 @@ import { useToastStore } from '../store/useToastStore';
 import { useCurrencyStore } from '../store/useCurrencyStore';
 import CurrencyToggle from '../components/common/CurrencyToggle';
 import ThemeToggle from '../components/common/ThemeToggle';
+import EditAccountModal from '../components/admin/EditAccountModal';
+import EditServiceModal from '../components/admin/EditServiceModal';
+import EditInternshipModal from '../components/admin/EditInternshipModal';
+import DispatchCredentialsModal from '../components/admin/DispatchCredentialsModal';
 
 const AdminPage = () => {
   const navigate = useNavigate();
@@ -65,6 +69,12 @@ const AdminPage = () => {
   const [isAddAccountModalOpen, setIsAddAccountModalOpen] = useState(false);
   const [isAddServiceModalOpen, setIsAddServiceModalOpen] = useState(false);
   const [isAddInternshipModalOpen, setIsAddInternshipModalOpen] = useState(false);
+
+  // Edit & Dispatch Modal states
+  const [editingAccount, setEditingAccount] = useState(null);
+  const [editingService, setEditingService] = useState(null);
+  const [editingInternship, setEditingInternship] = useState(null);
+  const [dispatchingOrder, setDispatchingOrder] = useState(null);
 
   // New Account state
   const [newAccount, setNewAccount] = useState({
@@ -304,6 +314,77 @@ const AdminPage = () => {
     },
     onError: (err) => {
       addToast({ message: err.message || 'Failed to update application', type: 'error' });
+    },
+  });
+
+  const updateAccountMutation = useMutation({
+    mutationFn: ({ id, data }) => api.updateAccount(id, data),
+    onSuccess: () => {
+      addToast({ message: 'Account details updated successfully!', type: 'success' });
+      setEditingAccount(null);
+      queryClient.invalidateQueries({ queryKey: ['admin-accounts'] });
+    },
+    onError: (err) => {
+      addToast({ message: err.message || 'Failed to update account', type: 'error' });
+    },
+  });
+
+  const updateServiceMutation = useMutation({
+    mutationFn: ({ id, data }) => api.updateService(id, data),
+    onSuccess: () => {
+      addToast({ message: 'Digital service updated successfully!', type: 'success' });
+      setEditingService(null);
+      queryClient.invalidateQueries({ queryKey: ['admin-services'] });
+    },
+    onError: (err) => {
+      addToast({ message: err.message || 'Failed to update service', type: 'error' });
+    },
+  });
+
+  const updateInternshipMutation = useMutation({
+    mutationFn: ({ id, data }) => api.updateInternship(id, data),
+    onSuccess: () => {
+      addToast({ message: 'Internship role updated successfully!', type: 'success' });
+      setEditingInternship(null);
+      queryClient.invalidateQueries({ queryKey: ['admin-internships'] });
+    },
+    onError: (err) => {
+      addToast({ message: err.message || 'Failed to update internship', type: 'error' });
+    },
+  });
+
+  const dispatchCredentialsMutation = useMutation({
+    mutationFn: ({ id, credentials }) => api.dispatchCredentials(id, credentials),
+    onSuccess: (data) => {
+      addToast({ message: data.message || 'Credentials dispatched to buyer vault!', type: 'success' });
+      setDispatchingOrder(null);
+      queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
+    },
+    onError: (err) => {
+      addToast({ message: err.message || 'Failed to dispatch credentials', type: 'error' });
+    },
+  });
+
+  const completeHandoffMutation = useMutation({
+    mutationFn: (id) => api.completeHandoff(id),
+    onSuccess: (data) => {
+      addToast({ message: data.message || 'Order handoff completed successfully!', type: 'success' });
+      queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
+    },
+    onError: (err) => {
+      addToast({ message: err.message || 'Failed to complete handoff', type: 'error' });
+    },
+  });
+
+  const updateRefundMutation = useMutation({
+    mutationFn: ({ id, status, adminNotes }) => api.updateRefundStatus(id, { status, adminNotes }),
+    onSuccess: (data) => {
+      addToast({ message: data.message || 'Refund status updated!', type: 'success' });
+      queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
+    },
+    onError: (err) => {
+      addToast({ message: err.message || 'Failed to update refund status', type: 'error' });
     },
   });
 
@@ -874,7 +955,7 @@ const AdminPage = () => {
 
               {/* Status Filter Buttons */}
               <div className="flex items-center gap-1.5 overflow-x-auto max-w-full pb-1">
-                {['All', 'Pending', 'Approved', 'Rejected'].map((status) => (
+                {['All', 'Pending', 'Approved', 'Rejected', 'Refunds'].map((status) => (
                   <button
                     key={status}
                     type="button"
@@ -1034,6 +1115,72 @@ const AdminPage = () => {
                         <span>Chat with Buyer on WhatsApp</span>
                       </a>
 
+                      {/* Refund Alert Banner if requested */}
+                      {ord.refund?.status === 'requested' && (
+                        <div className="w-full p-4 rounded-2xl bg-red-500/10 border border-red-500/30 space-y-2.5 my-2">
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <span className="text-xs font-bold text-red-600 dark:text-red-400 flex items-center gap-1.5">
+                              <AlertCircle className="w-4 h-4 shrink-0" />
+                              <span>Buyer Submitted a Refund Request</span>
+                            </span>
+                            <span className="text-[10px] font-mono text-slate-400">
+                              {ord.refund.requestedAt ? new Date(ord.refund.requestedAt).toLocaleString() : ''}
+                            </span>
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                            <div className="p-2.5 rounded-xl bg-white/60 dark:bg-obsidian-850">
+                              <span className="text-[10px] text-slate-400 uppercase font-bold block">Reason</span>
+                              <span className="font-semibold text-slate-900 dark:text-white">{ord.refund.reason}</span>
+                            </div>
+                            <div className="p-2.5 rounded-xl bg-white/60 dark:bg-obsidian-850">
+                              <span className="text-[10px] text-slate-400 uppercase font-bold block">Receiving UPI ID</span>
+                              <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400 select-all">{ord.refund.upiId}</span>
+                            </div>
+                          </div>
+                          {ord.refund.buyerNotes && (
+                            <p className="text-xs text-slate-600 dark:text-slate-300 italic bg-white/40 dark:bg-obsidian-900/60 p-2.5 rounded-xl">
+                              "{ord.refund.buyerNotes}"
+                            </p>
+                          )}
+                          <div className="flex items-center gap-2 pt-1">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (confirm(`Approve refund of ${formatAmount(ord.amount)} to UPI ID ${ord.refund.upiId}?`)) {
+                                  updateRefundMutation.mutate({ id: ord._id, status: 'approved' });
+                                }
+                              }}
+                              disabled={updateRefundMutation.isPending}
+                              className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs shadow-md shadow-red-600/25 cursor-pointer disabled:opacity-50"
+                            >
+                              Approve Refund & Revert Asset
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const note = prompt('Reason for declining refund request:', 'Order fulfilled according to terms.');
+                                if (note !== null) {
+                                  updateRefundMutation.mutate({ id: ord._id, status: 'rejected', adminNotes: note });
+                                }
+                              }}
+                              disabled={updateRefundMutation.isPending}
+                              className="px-3.5 py-2 rounded-xl bg-slate-200 dark:bg-obsidian-850 text-slate-700 dark:text-slate-300 font-bold text-xs hover:bg-slate-300 dark:hover:bg-obsidian-800 cursor-pointer"
+                            >
+                              Decline Refund
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {ord.refund?.status === 'approved' && (
+                        <div className="w-full p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold flex items-center justify-between my-1">
+                          <span>✓ Refund Processed to {ord.refund.upiId}</span>
+                          <span className="text-[10px] font-mono text-slate-400">
+                            {ord.refund.processedAt ? new Date(ord.refund.processedAt).toLocaleDateString() : ''}
+                          </span>
+                        </div>
+                      )}
+
                       {/* Payment Verification & Transfer Actions */}
                       <div className="flex flex-wrap items-center gap-2">
                         {ord.verificationStatus === 'Pending Admin Approval' && (
@@ -1067,38 +1214,39 @@ const AdminPage = () => {
                         )}
 
                         {ord.verificationStatus === 'Approved & Verified' && (
-                          <div className="flex items-center gap-2">
+                          <div className="flex flex-wrap items-center gap-2">
                             <button
                               type="button"
-                              onClick={() =>
-                                updateTransferMutation.mutate({
-                                  id: ord._id,
-                                  transferStatus: 'Credentials Sent to Email',
-                                })
-                              }
-                              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                                ord.transferStatus === 'Credentials Sent to Email'
+                              onClick={() => setDispatchingOrder(ord)}
+                              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                                ord.transferCredentials?.loginUsername || ord.transferStatus === 'Credentials Sent to Email'
                                   ? 'bg-blue-600 text-white shadow-md'
-                                  : 'bg-slate-100 dark:bg-obsidian-850 hover:bg-slate-200 dark:hover:bg-obsidian-800 text-slate-700 dark:text-slate-300'
+                                  : 'bg-brand-600 hover:bg-brand-700 text-white shadow-md shadow-brand-600/25'
                               }`}
                             >
-                              Mark Credentials Sent
+                              <Lock className="w-3.5 h-3.5" />
+                              <span>
+                                {ord.transferCredentials?.loginUsername
+                                  ? 'Credentials Dispatched (Edit)'
+                                  : 'Dispatch Credentials'}
+                              </span>
                             </button>
                             <button
                               type="button"
-                              onClick={() =>
-                                updateTransferMutation.mutate({
-                                  id: ord._id,
-                                  transferStatus: 'Transfer Complete',
-                                })
-                              }
-                              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                              onClick={() => completeHandoffMutation.mutate(ord._id)}
+                              disabled={completeHandoffMutation.isPending}
+                              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                                 ord.transferStatus === 'Transfer Complete'
                                   ? 'bg-emerald-600 text-white shadow-md'
                                   : 'bg-slate-100 dark:bg-obsidian-850 hover:bg-slate-200 dark:hover:bg-obsidian-800 text-slate-700 dark:text-slate-300'
                               }`}
                             >
-                              Complete Handoff
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              <span>
+                                {ord.transferStatus === 'Transfer Complete'
+                                  ? 'Handoff Complete ✓'
+                                  : 'Complete Handoff'}
+                              </span>
                             </button>
                           </div>
                         )}
@@ -1246,18 +1394,28 @@ const AdminPage = () => {
                         <ExternalLink className="w-3.5 h-3.5" />
                       </Link>
 
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (confirm(`Are you sure you want to delete ${acc.title}?`)) {
-                            deleteAccountMutation.mutate(acc._id);
-                          }
-                        }}
-                        className="p-2 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer"
-                        title="Delete Listing"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => setEditingAccount(acc)}
+                          className="p-2 rounded-xl text-slate-400 hover:text-brand-500 hover:bg-brand-500/10 transition-colors cursor-pointer"
+                          title="Edit Listing"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (confirm(`Are you sure you want to delete ${acc.title}?`)) {
+                              deleteAccountMutation.mutate(acc._id);
+                            }
+                          }}
+                          className="p-2 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer"
+                          title="Delete Listing"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -1318,18 +1476,28 @@ const AdminPage = () => {
                         <ExternalLink className="w-3.5 h-3.5" />
                       </Link>
 
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (confirm(`Are you sure you want to delete ${srv.title}?`)) {
-                            deleteServiceMutation.mutate(srv._id);
-                          }
-                        }}
-                        className="p-2 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer"
-                        title="Delete Service"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => setEditingService(srv)}
+                          className="p-2 rounded-xl text-slate-400 hover:text-purple-500 hover:bg-purple-500/10 transition-colors cursor-pointer"
+                          title="Edit Service"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (confirm(`Are you sure you want to delete ${srv.title}?`)) {
+                              deleteServiceMutation.mutate(srv._id);
+                            }
+                          }}
+                          className="p-2 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer"
+                          title="Delete Service"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -1596,18 +1764,28 @@ const AdminPage = () => {
                         <ExternalLink className="w-3.5 h-3.5" />
                       </Link>
 
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (confirm(`Are you sure you want to delete ${role.title}?`)) {
-                            deleteInternshipMutation.mutate(role._id);
-                          }
-                        }}
-                        className="p-2 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer"
-                        title="Delete Role"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => setEditingInternship(role)}
+                          className="p-2 rounded-xl text-slate-400 hover:text-emerald-500 hover:bg-emerald-500/10 transition-colors cursor-pointer"
+                          title="Edit Position"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (confirm(`Are you sure you want to delete ${role.title}?`)) {
+                              deleteInternshipMutation.mutate(role._id);
+                            }
+                          }}
+                          className="p-2 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer"
+                          title="Delete Role"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -2181,6 +2359,42 @@ const AdminPage = () => {
           </div>
         </div>
       )}
+
+      {/* Edit Account Modal */}
+      <EditAccountModal
+        isOpen={!!editingAccount}
+        onClose={() => setEditingAccount(null)}
+        account={editingAccount}
+        onSubmit={({ id, data }) => updateAccountMutation.mutate({ id, data })}
+        isPending={updateAccountMutation.isPending}
+      />
+
+      {/* Edit Service Modal */}
+      <EditServiceModal
+        isOpen={!!editingService}
+        onClose={() => setEditingService(null)}
+        service={editingService}
+        onSubmit={({ id, data }) => updateServiceMutation.mutate({ id, data })}
+        isPending={updateServiceMutation.isPending}
+      />
+
+      {/* Edit Internship Modal */}
+      <EditInternshipModal
+        isOpen={!!editingInternship}
+        onClose={() => setEditingInternship(null)}
+        internship={editingInternship}
+        onSubmit={({ id, data }) => updateInternshipMutation.mutate({ id, data })}
+        isPending={updateInternshipMutation.isPending}
+      />
+
+      {/* Dispatch Credentials Modal */}
+      <DispatchCredentialsModal
+        isOpen={!!dispatchingOrder}
+        onClose={() => setDispatchingOrder(null)}
+        order={dispatchingOrder}
+        onSubmit={({ id, credentials }) => dispatchCredentialsMutation.mutate({ id, credentials })}
+        isPending={dispatchCredentialsMutation.isPending}
+      />
     </div>
   );
 };

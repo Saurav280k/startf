@@ -45,13 +45,14 @@ function App() {
   const { theme } = useThemeStore();
   const location = useLocation();
 
-  // Hide footer from accounts, services, internships, checkout, order-success, cart, and admin pages
+  // Hide footer from accounts, services, internships, checkout, order-success, order-tracker, cart, and admin pages
   const hideFooter = [
     '/accounts',
     '/services',
     '/internships',
     '/checkout',
     '/order-success',
+    '/order-tracker',
     '/cart',
     '/admin',
   ].some((prefix) => location.pathname.startsWith(prefix));
@@ -83,6 +84,7 @@ function App() {
             <Route path="/cart" element={<CartPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/order-success/:id" element={<OrderSuccessPage />} />
+            <Route path="/order-tracker/:id" element={<OrderSuccessPage />} />
             <Route path="/my-orders" element={<MyOrdersPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />

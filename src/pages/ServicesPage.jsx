@@ -5,6 +5,7 @@ import { Sparkles, Check, ArrowRight, Code, TrendingUp, Palette, Server, Star } 
 import { api } from '../api/client';
 import { ShimmerList } from '../components/common/ShimmerCard';
 import { useCurrencyStore } from '../store/useCurrencyStore';
+import CatalogNavTabs from '../components/common/CatalogNavTabs';
 
 const getServiceIcon = (category) => {
   switch (category) {
@@ -33,13 +34,16 @@ const ServicesPage = () => {
   const categories = ['All', 'Development', 'Growth', 'Design', 'Cloud & DevOps'];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
+      {/* Universal Catalog Switcher: Accounts | Services | Internships */}
+      <CatalogNavTabs />
+
       {/* Header */}
-      <div className="space-y-2">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider">
+      <div className="space-y-1.5">
+        <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider">
           Digital Services
         </div>
-        <h1 className="text-3xl sm:text-4xl font-black font-display text-slate-950 dark:text-white">
+        <h1 className="text-2xl sm:text-3xl font-black font-display text-slate-950 dark:text-white">
           Professional Tech & Growth Services
         </h1>
       </div>

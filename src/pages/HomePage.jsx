@@ -74,22 +74,22 @@ const HomePage = () => {
   }, []);
 
   return (
-    <div className="space-y-24 pb-20">
+    <div className="space-y-12 sm:space-y-16 pb-16">
       {/* Hero Section */}
-      <section ref={heroRef} className="relative pt-12 md:pt-20 overflow-hidden">
+      <section ref={heroRef} className="relative pt-4 sm:pt-8 overflow-hidden">
         {/* Glow ambient backgrounds */}
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-gradient-to-tr from-brand-600/20 to-blue-500/10 blur-[120px] rounded-full pointer-events-none -z-10" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
             {/* Left Column: Kinetic Hero Copy */}
-            <div className="lg:col-span-7 space-y-6 text-left">
-              <div className="hero-anim inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-100 dark:bg-obsidian-850 border border-slate-200/80 dark:border-white/10 text-slate-700 dark:text-slate-300 text-xs font-semibold shadow-sm">
+            <div className="lg:col-span-7 space-y-5 text-left">
+              <div className="hero-anim inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-slate-100 dark:bg-obsidian-850 border border-slate-200/80 dark:border-white/10 text-slate-700 dark:text-slate-300 text-xs font-semibold shadow-sm">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                 <span>Next-Gen Marketplace & Talent Portal</span>
               </div>
 
-              <h1 className="hero-anim text-4xl sm:text-5xl lg:text-6xl font-black font-display tracking-tight text-slate-950 dark:text-white leading-[1.1]">
+              <h1 className="hero-anim text-3xl sm:text-5xl lg:text-6xl font-black font-display tracking-tight text-slate-950 dark:text-white leading-[1.1]">
                 Acquire Verified <br />
                 <span className="bg-gradient-to-r from-brand-600 via-blue-500 to-emerald-400 bg-clip-text text-transparent">
                   Digital Properties
@@ -97,41 +97,49 @@ const HomePage = () => {
                 & Top Talent.
               </h1>
 
-              <p className="hero-anim text-base sm:text-lg text-slate-600 dark:text-slate-400 max-w-xl leading-relaxed">
-                Buy high-reach monetized social media accounts with 100% Safe Buyer Protection, hire expert digital services, or apply for paid tech internships.
+              <p className="hero-anim text-sm sm:text-base text-slate-600 dark:text-slate-400 max-w-xl leading-relaxed">
+                Buy high-reach monetized social media accounts with escrow protection, hire expert digital services, or apply for paid tech internships.
               </p>
 
-              {/* Action Buttons */}
-              <div className="hero-anim flex flex-wrap gap-4 pt-2">
+              {/* Action Buttons: Quick 1-tap portals to Accounts, Services, and Internships */}
+              <div className="hero-anim flex flex-wrap gap-2.5 pt-1">
                 <Link
                   to="/accounts"
-                  className="flex items-center gap-2.5 px-6 py-3.5 rounded-2xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm transition-all shadow-xl shadow-brand-600/30 hover:scale-105"
+                  className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs sm:text-sm transition-all shadow-lg shadow-brand-600/25 hover:scale-105 cursor-pointer"
                 >
+                  <Layers className="w-4 h-4" />
                   <span>Explore Accounts</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+                <Link
+                  to="/services"
+                  className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs sm:text-sm transition-all shadow-lg shadow-purple-600/25 hover:scale-105 cursor-pointer"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  <span>Digital Services</span>
                 </Link>
                 <Link
                   to="/internships"
-                  className="flex items-center gap-2.5 px-6 py-3.5 rounded-2xl bg-slate-100 dark:bg-obsidian-850 hover:bg-slate-200 dark:hover:bg-obsidian-700 text-slate-900 dark:text-white border border-slate-200/80 dark:border-white/10 font-bold text-sm transition-all"
+                  className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-slate-100 dark:bg-obsidian-850 hover:bg-slate-200 dark:hover:bg-obsidian-700 text-slate-900 dark:text-white border border-slate-200/80 dark:border-white/10 font-bold text-xs sm:text-sm transition-all cursor-pointer"
                 >
                   <Briefcase className="w-4 h-4 text-brand-500" />
-                  <span>Apply for Internships</span>
+                  <span>Tech Internships</span>
                 </Link>
               </div>
 
               {/* Trust Indicators */}
-              <div className="hero-anim pt-6 border-t border-slate-200/80 dark:border-white/5 flex flex-wrap items-center gap-6 text-xs text-slate-500 dark:text-slate-400">
-                <div className="flex items-center gap-2">
+              <div className="hero-anim pt-4 border-t border-slate-200/80 dark:border-white/5 flex flex-wrap items-center gap-5 text-xs text-slate-500 dark:text-slate-400">
+                <div className="flex items-center gap-1.5">
                   <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                  <span>100% Safe Buyer Protection</span>
+                  <span>Escrow Buyer Protection</span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
                   <Zap className="w-4 h-4 text-amber-500" />
                   <span>Sub-4Hr Credential Transfer</span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
                   <Award className="w-4 h-4 text-brand-500" />
-                  <span>Verified Audience Proof</span>
+                  <span>Audience Verified</span>
                 </div>
               </div>
             </div>
@@ -370,11 +378,11 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* 100% Safe Buyer Protection Workflow */}
+      {/* Escrow Protected Transfer Workflow */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-2xl mx-auto mb-12">
+        <div className="text-center max-w-2xl mx-auto mb-8">
           <h2 className="text-2xl sm:text-3xl font-black font-display text-slate-950 dark:text-white">
-            100% Safe & Protected Payments
+            Escrow Protected Transfer Workflow
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2">
             Every transaction is protected until you receive and verify full ownership.
