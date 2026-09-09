@@ -1331,7 +1331,7 @@ const AdminPage = () => {
                 {accounts.map((acc) => (
                   <div
                     key={acc._id}
-                    className="rounded-3xl p-5 bg-white dark:bg-obsidian-900 border border-slate-200/80 dark:border-white/10 shadow-sm flex flex-col justify-between space-y-4"
+                    className="rounded-3xl p-5 bg-white dark:bg-obsidian-900 border-2 border-slate-200 dark:border-white/15 shadow-sm hover:border-brand-500/50 transition-all flex flex-col justify-between space-y-4"
                   >
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
@@ -1428,7 +1428,7 @@ const AdminPage = () => {
                 {services.map((srv) => (
                   <div
                     key={srv._id}
-                    className="rounded-3xl p-5 bg-white dark:bg-obsidian-900 border border-slate-200/80 dark:border-white/10 shadow-sm flex flex-col justify-between space-y-4"
+                    className="rounded-3xl p-5 bg-white dark:bg-obsidian-900 border-2 border-slate-200 dark:border-white/15 shadow-sm hover:border-purple-500/50 transition-all flex flex-col justify-between space-y-4"
                   >
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
@@ -1719,7 +1719,7 @@ const AdminPage = () => {
                 {internships.map((role) => (
                   <div
                     key={role._id}
-                    className="rounded-3xl p-6 bg-white dark:bg-obsidian-900 border border-slate-200/80 dark:border-white/10 shadow-sm flex flex-col justify-between space-y-4"
+                    className="rounded-3xl p-6 bg-white dark:bg-obsidian-900 border-2 border-slate-200 dark:border-white/15 shadow-sm hover:border-emerald-500/50 transition-all flex flex-col justify-between space-y-4"
                   >
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">

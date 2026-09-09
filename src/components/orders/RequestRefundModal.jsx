@@ -79,7 +79,7 @@ const RequestRefundModal = ({ isOpen, onClose, order, onSuccess }) => {
             <span className="font-bold text-slate-900 dark:text-white block">
               {order.itemSnapshot?.title || 'Purchased Asset'}
             </span>
-            <span className="text-[11px] text-slate-400">Escrow Protected Refund</span>
+            <span className="text-[11px] text-slate-400">Buyer Protection Refund</span>
           </div>
           <div className="text-right font-black font-display text-slate-900 dark:text-white text-sm">
             {formatAmount(order.amount)}

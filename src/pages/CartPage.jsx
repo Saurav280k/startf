@@ -52,7 +52,7 @@ const CartPage = () => {
         </Link>
         <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold border border-emerald-500/20">
           <ShieldCheck className="w-4 h-4" />
-          <span>Escrow Buyer Protection</span>
+          <span>Buyer Protection Guarantee</span>
         </div>
       </div>
 
@@ -114,25 +114,25 @@ const CartPage = () => {
             {items.map((item, idx) => (
               <div
                 key={`${item.id}-${item.tierName || idx}`}
-                className="p-5 rounded-3xl bg-white dark:bg-obsidian-900 border border-slate-200/80 dark:border-white/10 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-all hover:border-brand-500/40"
+                className="w-full overflow-hidden p-4 sm:p-5 rounded-3xl bg-white dark:bg-obsidian-900 border border-slate-200/80 dark:border-white/10 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-all hover:border-brand-500/40"
               >
-                <div className="flex items-center gap-4 min-w-0 flex-1">
+                <div className="flex items-center gap-3 sm:gap-4 min-w-0 w-full sm:flex-1 overflow-hidden">
                   {item.image ? (
-                    <div className="w-16 h-16 rounded-2xl overflow-hidden bg-slate-900 shrink-0 border border-slate-200/80 dark:border-white/10">
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl overflow-hidden bg-slate-900 shrink-0 border border-slate-200/80 dark:border-white/10">
                       <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
                     </div>
                   ) : (
-                    <div className="w-16 h-16 rounded-2xl bg-brand-500/10 text-brand-600 flex items-center justify-center shrink-0">
+                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-brand-500/10 text-brand-600 flex items-center justify-center shrink-0">
                       {item.type === 'account' ? (
-                        <Layers className="w-7 h-7" />
+                        <Layers className="w-6 h-6 sm:w-7 sm:h-7" />
                       ) : (
-                        <Sparkles className="w-7 h-7" />
+                        <Sparkles className="w-6 h-6 sm:w-7 sm:h-7" />
                       )}
                     </div>
                   )}
 
-                  <div className="min-w-0 flex-1 space-y-1">
-                    <div className="flex items-center gap-2">
+                  <div className="min-w-0 flex-1 space-y-1 overflow-hidden">
+                    <div className="flex flex-wrap items-center gap-1.5">
                       <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-400">
                         {item.type === 'account' ? 'Social Account' : 'Digital Service'}
                       </span>
@@ -142,7 +142,7 @@ const CartPage = () => {
                         </span>
                       )}
                     </div>
-                    <h3 className="text-sm font-bold text-slate-900 dark:text-white truncate">
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-white break-words line-clamp-2 leading-snug">
                       {item.title}
                     </h3>
                     <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
@@ -151,9 +151,10 @@ const CartPage = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between sm:justify-end gap-5 w-full sm:w-auto pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-white/5">
-                  <div className="text-right">
-                    <div className="text-lg font-black font-display text-slate-900 dark:text-white">
+                <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto pt-3 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-white/5 shrink-0">
+                  <div className="text-left sm:text-right">
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block sm:hidden">Price</span>
+                    <div className="text-base sm:text-lg font-black font-display text-slate-900 dark:text-white">
                       {formatAmount(item.price)}
                     </div>
                   </div>
@@ -230,12 +231,12 @@ const CartPage = () => {
 
       {/* Sticky Bottom Middle Bar for Instant Total and Quick Checkout */}
       {items.length > 0 && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[94%] sm:w-auto min-w-[320px] sm:min-w-[420px] max-w-lg bg-slate-950/95 dark:bg-obsidian-850/95 backdrop-blur-2xl text-white rounded-full p-3 sm:px-6 shadow-2xl border border-slate-700/60 dark:border-white/20 flex items-center justify-between gap-4 animate-in slide-in-from-bottom-6">
-          <div className="flex flex-col pl-2">
-            <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+        <div className="fixed bottom-4 sm:bottom-6 inset-x-3 sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 z-50 w-auto sm:w-full sm:max-w-md bg-slate-950/95 dark:bg-obsidian-900/95 backdrop-blur-2xl text-white rounded-2xl sm:rounded-full p-3 px-4 sm:px-6 shadow-2xl border border-slate-700/80 dark:border-white/20 flex items-center justify-between gap-3 animate-in slide-in-from-bottom-4">
+          <div className="flex flex-col min-w-0 pr-2">
+            <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider truncate">
               Total ({items.length} {items.length === 1 ? 'item' : 'items'})
             </span>
-            <span className="text-lg sm:text-xl font-black font-display text-white">
+            <span className="text-base sm:text-xl font-black font-display text-white truncate">
               {formatAmount(totalAmount)}
             </span>
           </div>
@@ -244,7 +245,7 @@ const CartPage = () => {
             type="button"
             onClick={handleCheckout}
             id="cart-sticky-pay-now-btn"
-            className="flex items-center gap-2 px-6 py-3 rounded-full bg-brand-600 hover:bg-brand-500 active:scale-95 text-white font-bold text-xs sm:text-sm transition-all shadow-lg shadow-brand-600/40 cursor-pointer"
+            className="flex items-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-full bg-brand-600 hover:bg-brand-500 active:scale-95 text-white font-bold text-xs sm:text-sm transition-all shadow-lg shadow-brand-600/40 cursor-pointer shrink-0"
           >
             <span>Pay Now</span>
             <ArrowRight className="w-4 h-4" />

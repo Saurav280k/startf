@@ -99,7 +99,7 @@ const HomePage = () => {
               </h1>
 
               <p className="hero-anim text-sm sm:text-base text-slate-600 dark:text-slate-400 max-w-xl leading-relaxed">
-                Buy high-reach monetized social media accounts with escrow protection, hire expert digital services, or apply for paid tech internships.
+                Buy high-reach monetized social media accounts with buyer protection guarantee, hire expert digital services, or apply for paid tech internships.
               </p>
 
               {/* Action Buttons: Quick 1-tap portals to Accounts, Services, and Internships */}
@@ -132,7 +132,7 @@ const HomePage = () => {
               <div className="hero-anim pt-4 border-t border-slate-200/80 dark:border-white/5 flex flex-wrap items-center gap-5 text-xs text-slate-500 dark:text-slate-400">
                 <div className="flex items-center gap-1.5">
                   <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                  <span>Escrow Buyer Protection</span>
+                  <span>Buyer Protection Guarantee</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <Zap className="w-4 h-4 text-amber-500" />
@@ -145,10 +145,13 @@ const HomePage = () => {
               </div>
             </div>
 
-            {/* Right Column: Floating Interactive Cards */}
+            {/* Right Column: Floating Interactive Cards (Both clickable) */}
             <div className="lg:col-span-5 relative flex justify-center items-center pt-6 pb-28 sm:pb-12">
-              {/* Card 1: Featured Social Account Mockup */}
-              <div className="floating-card-1 w-full max-w-sm rounded-3xl p-6 glass-panel shadow-2xl border border-slate-200/80 dark:border-white/10 relative z-20">
+              {/* Card 1: Featured Social Account Mockup - Clickable to /accounts */}
+              <Link
+                to="/accounts"
+                className="floating-card-1 block w-full max-w-sm rounded-3xl p-6 glass-panel shadow-2xl border-2 border-slate-200/90 dark:border-white/15 hover:border-brand-500/80 dark:hover:border-brand-500/80 transition-all duration-300 relative z-20 cursor-pointer group hover:scale-[1.02]"
+              >
                 <div className="flex items-center justify-between mb-4">
                   <span className="px-3 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-pink-500 to-purple-600 text-white">
                     Instagram Viral
@@ -158,14 +161,14 @@ const HomePage = () => {
                     +6.8% Engagement
                   </span>
                 </div>
-                <div className="w-full h-36 rounded-2xl overflow-hidden mb-4 bg-slate-900">
+                <div className="w-full h-36 rounded-2xl overflow-hidden mb-4 bg-slate-900 border border-slate-200/60 dark:border-white/10">
                   <img
                     src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80"
                     alt="preview"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 </div>
-                <h4 className="font-bold text-base text-slate-900 dark:text-white">
+                <h4 className="font-bold text-base text-slate-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-400 transition-colors">
                   @techfuture.ai • 148.2K
                 </h4>
                 <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 mb-4">
@@ -175,27 +178,27 @@ const HomePage = () => {
                   <span className="text-lg font-black font-display text-slate-900 dark:text-white">
                     {formatAmount(112500)}
                   </span>
-                  <Link
-                    to="/accounts"
-                    className="px-3.5 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold transition-all"
-                  >
-                    View Asset
-                  </Link>
+                  <span className="px-3.5 py-1.5 rounded-xl bg-brand-600 group-hover:bg-brand-500 text-white text-xs font-bold transition-all shadow-md shadow-brand-600/20">
+                    Explore Accounts →
+                  </span>
                 </div>
-              </div>
+              </Link>
 
-              {/* Card 2: Floating Internship Notification Badge (Fully visible on mobile, never overlapping metrics bar) */}
-              <div className="floating-card-2 absolute bottom-2 sm:-bottom-4 right-2 sm:-right-4 w-60 sm:w-64 rounded-2xl p-3 sm:p-4 glass-panel bg-white/95 dark:bg-obsidian-900/95 shadow-2xl border border-emerald-500/30 z-30">
+              {/* Card 2: Floating Internship Notification Badge - Clickable to /internships */}
+              <Link
+                to="/internships"
+                className="floating-card-2 block absolute bottom-2 sm:-bottom-4 right-2 sm:-right-4 w-60 sm:w-64 rounded-2xl p-3 sm:p-4 glass-panel bg-white/95 dark:bg-obsidian-900/95 shadow-2xl border-2 border-emerald-500/40 hover:border-emerald-500 z-30 transition-all duration-300 hover:scale-[1.04] cursor-pointer group"
+              >
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center font-bold">
+                  <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center font-bold group-hover:scale-110 transition-transform">
                     <Briefcase className="w-4 h-4" />
                   </div>
                   <div>
-                    <h5 className="text-xs font-bold text-slate-900 dark:text-white">Full Stack Intern</h5>
+                    <h5 className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-emerald-500 transition-colors">Full Stack Intern</h5>
                     <p className="text-[11px] text-emerald-500 font-semibold">{formatAmount(45000)}/mo Stipend • Remote</p>
                   </div>
                 </div>
-              </div>
+              </Link>
             </div>
           </div>
         </div>
@@ -302,7 +305,7 @@ const HomePage = () => {
               <Link
                 key={srv._id}
                 to={`/services/${srv._id}`}
-                className="group rounded-3xl p-5 sm:p-6 bg-white dark:bg-obsidian-900/80 border border-slate-200/80 dark:border-white/10 hover:border-brand-500/80 transition-all duration-300 flex flex-col justify-between hover:shadow-xl hover:-translate-y-0.5 cursor-pointer"
+                className="group rounded-3xl p-5 sm:p-6 bg-white dark:bg-obsidian-900 border-2 border-slate-200 dark:border-white/15 hover:border-purple-500 dark:hover:border-purple-400 transition-all duration-300 flex flex-col justify-between shadow-md hover:shadow-xl hover:-translate-y-0.5 cursor-pointer"
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
@@ -379,11 +382,11 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* Escrow Protected Transfer Workflow */}
+      {/* Secure Buyer Protection & Transfer Workflow */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-8">
           <h2 className="text-2xl sm:text-3xl font-black font-display text-slate-950 dark:text-white">
-            Escrow Protected Transfer Workflow
+            Secure Buyer Protection & Transfer Workflow
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-2">
             Every transaction is protected until you receive and verify full ownership.

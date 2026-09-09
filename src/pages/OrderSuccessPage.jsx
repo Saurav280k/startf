@@ -161,7 +161,7 @@ const OrderSuccessPage = () => {
 
           <span className="text-xs font-bold text-brand-600 dark:text-brand-400 bg-brand-500/10 px-3 py-1 rounded-full flex items-center gap-1.5 border border-brand-500/20">
             <ShieldCheck className="w-3.5 h-3.5" />
-            <span>Escrow Protected Order</span>
+            <span>Buyer Protection Order</span>
           </span>
         </div>
       </div>
@@ -377,7 +377,7 @@ const OrderSuccessPage = () => {
               Credentials are being verified and prepared.
             </p>
             <p className="text-[11px] text-slate-400 max-w-md mx-auto">
-              Our escrow system safeguards the credentials until payment verification is completed. Once dispatched, your username, password, and security instructions will unlock here immediately.
+              Our security system safeguards the credentials until payment verification is completed. Once dispatched, your username, password, and security instructions will unlock here immediately.
             </p>
           </div>
         )}
@@ -464,7 +464,7 @@ const OrderSuccessPage = () => {
             <h2 className="text-base font-bold text-slate-900 dark:text-white">
               Transfer Activity Log
             </h2>
-            <p className="text-[11px] text-slate-400">Timestamped escrow and audit events</p>
+            <p className="text-[11px] text-slate-400">Timestamped transfer and audit events</p>
           </div>
 
           <div className="space-y-3">

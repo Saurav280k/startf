@@ -331,7 +331,7 @@ const CheckoutPage = () => {
 
         <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold border border-emerald-500/20">
           <ShieldCheck className="w-4 h-4" />
-          <span>Escrow Buyer Protection</span>
+          <span>Buyer Protection Guarantee</span>
         </div>
       </div>
 

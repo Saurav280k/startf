@@ -79,7 +79,7 @@ const InternshipsPage = () => {
             <Link
               key={role._id}
               to={`/internships/${role._id}/apply`}
-              className="group relative block rounded-3xl p-6 sm:p-8 bg-white dark:bg-obsidian-900 border border-slate-200/80 dark:border-white/10 hover:border-brand-500/80 dark:hover:border-brand-500/80 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 cursor-pointer flex flex-col justify-between"
+              className="group relative block rounded-3xl p-6 sm:p-8 bg-white dark:bg-obsidian-900 border-2 border-slate-200 dark:border-white/15 hover:border-emerald-500 dark:hover:border-emerald-400 shadow-md hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col justify-between"
             >
               <div className="space-y-4">
                 {/* Top header */}
