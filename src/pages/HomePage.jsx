@@ -14,6 +14,7 @@ import {
   Users,
   Award,
   ChevronRight,
+  Layers,
 } from 'lucide-react';
 import { api } from '../api/client';
 import AccountCard from '../components/accounts/AccountCard';
