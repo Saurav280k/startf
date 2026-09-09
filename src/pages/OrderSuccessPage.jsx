@@ -191,13 +191,26 @@ const OrderSuccessPage = () => {
             </h1>
           </div>
 
-          <div className="sm:text-right">
-            <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">
-              Total Amount
-            </span>
-            <span className="text-2xl font-black font-display text-slate-900 dark:text-white">
-              {formatAmount(order.amount)}
-            </span>
+          <div className="flex flex-wrap sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-2 w-full sm:w-auto">
+            <div className="sm:text-right">
+              <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">
+                Total Amount
+              </span>
+              <span className="text-2xl font-black font-display text-slate-900 dark:text-white">
+                {formatAmount(order.amount)}
+              </span>
+            </div>
+
+            {/* Quick Request Refund button right at top */}
+            {(!order.refund || order.refund.status === 'rejected') && (
+              <button
+                type="button"
+                onClick={() => setIsRefundModalOpen(true)}
+                className="px-3.5 py-1.5 rounded-xl border border-red-500/30 hover:bg-red-500/10 text-red-600 dark:text-red-400 font-bold text-xs transition-colors cursor-pointer"
+              >
+                Request Refund
+              </button>
+            )}
           </div>
         </div>
 

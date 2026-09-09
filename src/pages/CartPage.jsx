@@ -205,14 +205,13 @@ const CartPage = () => {
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={handleCheckout}
+              <Link
+                to="/checkout"
                 className="w-full py-4 px-6 rounded-2xl bg-brand-600 hover:bg-brand-500 active:scale-[0.99] text-white font-bold text-sm transition-all shadow-xl shadow-brand-600/30 flex items-center justify-center gap-2 cursor-pointer"
               >
                 <Lock className="w-4 h-4" />
                 <span>Proceed to Checkout ({formatAmount(totalAmount)})</span>
-              </button>
+              </Link>
 
               {/* Safety Badge Box */}
               <div className="p-4 rounded-2xl bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-500/20 space-y-1.5 text-xs">
@@ -231,7 +230,7 @@ const CartPage = () => {
 
       {/* Sticky Bottom Middle Bar for Instant Total and Quick Checkout */}
       {items.length > 0 && (
-        <div className="fixed bottom-4 sm:bottom-6 inset-x-3 sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 z-50 w-auto sm:w-full sm:max-w-md bg-slate-950/95 dark:bg-obsidian-900/95 backdrop-blur-2xl text-white rounded-2xl sm:rounded-full p-3 px-4 sm:px-6 shadow-2xl border border-slate-700/80 dark:border-white/20 flex items-center justify-between gap-3 animate-in slide-in-from-bottom-4">
+        <div className="fixed bottom-4 sm:bottom-6 left-0 right-0 mx-auto z-50 w-[calc(100%-1.5rem)] sm:w-full sm:max-w-md bg-slate-950/95 dark:bg-obsidian-900/95 backdrop-blur-2xl text-white rounded-2xl sm:rounded-full p-3 px-4 sm:px-6 shadow-2xl border border-slate-700/80 dark:border-white/20 flex items-center justify-between gap-3 pointer-events-auto">
           <div className="flex flex-col min-w-0 pr-2">
             <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider truncate">
               Total ({items.length} {items.length === 1 ? 'item' : 'items'})
@@ -241,15 +240,14 @@ const CartPage = () => {
             </span>
           </div>
 
-          <button
-            type="button"
-            onClick={handleCheckout}
+          <Link
+            to="/checkout"
             id="cart-sticky-pay-now-btn"
             className="flex items-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-full bg-brand-600 hover:bg-brand-500 active:scale-95 text-white font-bold text-xs sm:text-sm transition-all shadow-lg shadow-brand-600/40 cursor-pointer shrink-0"
           >
             <span>Pay Now</span>
             <ArrowRight className="w-4 h-4" />
-          </button>
+          </Link>
         </div>
       )}
     </div>

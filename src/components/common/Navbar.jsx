@@ -33,7 +33,7 @@ const Navbar = () => {
   return (
     <>
       {!hideHeader && (
-        <header className="sticky top-0 z-40 w-full transition-all duration-300 glass-panel border-b border-slate-200/80 dark:border-white/10">
+        <header className="sticky top-0 z-40 w-full transition-colors duration-200 bg-white dark:bg-obsidian-950 border-b border-slate-200 dark:border-slate-800 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           {/* Brand Logo */}
           <Link to="/" className="flex items-center gap-3 group">
