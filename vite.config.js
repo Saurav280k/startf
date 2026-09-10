@@ -4,7 +4,7 @@ import tailwindcss from '@tailwindcss/vite'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  envPrefix: ['VITE_', 'API_'],
+  envPrefix: ['VITE_', 'API_', 'ADMIN_'],
   plugins: [
     tailwindcss(),
     react(),

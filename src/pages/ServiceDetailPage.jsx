@@ -11,7 +11,7 @@ import { useCartStore } from '../store/useCartStore';
 const ServiceDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuthStore();
+  const { user, isAuthenticated } = useAuthStore();
   const { addToast } = useToastStore();
   const { formatAmount } = useCurrencyStore();
   const { addItem } = useCartStore();
@@ -44,11 +44,20 @@ const ServiceDetailPage = () => {
       return;
     }
 
-    navigate(
-      `/checkout?type=service&id=${service._id}&tier=${encodeURIComponent(
-        currentTier.tierName
-      )}&transferEmail=${encodeURIComponent(deliveryEmail)}`
-    );
+    const checkoutPath = `/checkout?type=service&id=${service._id}&tier=${encodeURIComponent(
+      currentTier.tierName
+    )}&transferEmail=${encodeURIComponent(deliveryEmail)}`;
+
+    if (!isAuthenticated) {
+      addToast({
+        message: 'Please sign in or create an account to order this service.',
+        type: 'info',
+      });
+      navigate(`/login?redirect=${encodeURIComponent(checkoutPath)}`);
+      return;
+    }
+
+    navigate(checkoutPath);
   };
 
   const handleAddToCart = () => {

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../../api/client';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useToastStore } from '../../store/useToastStore';
@@ -9,8 +9,10 @@ const GOOGLE_CLIENT_ID =
   import.meta.env.GOOGLE_CLIENT_ID ||
   '476772254070-dipbjkh4lv5i63ljsihme4knm3gdhnjc.apps.googleusercontent.com';
 
-const GoogleAuthButton = ({ mode = 'signin' }) => {
+const GoogleAuthButton = ({ mode = 'signin', redirect }) => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const targetRedirect = redirect || searchParams.get('redirect') || '/';
   const { setAuth } = useAuthStore();
   const { addToast } = useToastStore();
   const [isLoading, setIsLoading] = useState(false);
@@ -34,7 +36,7 @@ const GoogleAuthButton = ({ mode = 'signin' }) => {
         message: `Welcome${res.user.username ? `, ${res.user.username}` : ''}! Successfully authenticated with Google.`,
         type: 'success',
       });
-      navigate('/');
+      navigate(targetRedirect, { replace: true });
     } catch (err) {
       addToast({
         message: err.message || 'Google authentication failed. Please try again or use email sign-in.',

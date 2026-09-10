@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
   ShoppingBag,
@@ -11,6 +11,7 @@ import {
   Clock,
   AlertCircle,
   CheckCircle2,
+  RotateCcw,
 } from 'lucide-react';
 import { api } from '../api/client';
 import { useAuthStore } from '../store/useAuthStore';
@@ -19,6 +20,10 @@ import { ShimmerList } from '../components/common/ShimmerCard';
 import RequestRefundModal from '../components/orders/RequestRefundModal';
 
 const MyOrdersPage = () => {
+  const [searchParams] = useSearchParams();
+  const location = useLocation();
+  const isRefundMode = searchParams.get('action') === 'refund' || location.pathname === '/request-refund';
+
   const { user, isAuthenticated } = useAuthStore();
   const { formatAmount } = useCurrencyStore();
   const [lookupEmail, setLookupEmail] = useState(user?.email || '');
@@ -42,11 +47,34 @@ const MyOrdersPage = () => {
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-black font-display text-slate-900 dark:text-white">
-          My Purchases & Orders
-        </h1>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-black font-display text-slate-900 dark:text-white">
+            My Purchases & Orders
+          </h1>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            Track ownership handovers, credential vaults, and buyer protection refunds
+          </p>
+        </div>
+
+        <Link
+          to="/refund-policy"
+          className="inline-flex items-center gap-1.5 text-xs text-brand-600 dark:text-brand-400 font-bold hover:underline"
+        >
+          <ShieldCheck className="w-4 h-4" />
+          <span>Buyer Protection Policy</span>
+        </Link>
       </div>
+
+      {/* Refund Claims Mode Alert Banner */}
+      {isRefundMode && (
+        <div className="p-4 rounded-2xl bg-red-500/10 border border-red-500/30 flex items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-2.5 text-red-600 dark:text-red-400 font-bold">
+            <RotateCcw className="w-4 h-4 shrink-0 animate-pulse" />
+            <span>Refund Mode: Select your purchase below and click "Request Refund" to submit your claim.</span>
+          </div>
+        </div>
+      )}
 
       {/* Guest Email Lookup Bar if not logged in */}
       {!isAuthenticated && (
@@ -220,9 +248,11 @@ const MyOrdersPage = () => {
                     <button
                       type="button"
                       onClick={() => setSelectedRefundOrder(ord)}
-                      className="px-3.5 py-2 rounded-xl border border-red-500/30 hover:bg-red-500/10 text-red-600 dark:text-red-400 font-bold text-xs transition-colors cursor-pointer"
+                      id={`request-refund-btn-${ord.orderNumber}`}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs shadow-sm shadow-red-600/25 transition-all active:scale-95 cursor-pointer"
                     >
-                      Request Refund
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      <span>Request Refund</span>
                     </button>
                   )}
 

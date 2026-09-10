@@ -19,6 +19,7 @@ import {
   LogOut,
   Edit3,
   Check,
+  RotateCcw,
 } from 'lucide-react';
 import { api } from '../api/client';
 import { useAuthStore } from '../store/useAuthStore';
@@ -173,14 +174,25 @@ const ProfilePage = () => {
             </div>
           </div>
 
-          <Link
-            to="/my-orders"
-            id="profile-my-orders-btn"
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs shadow-md shadow-brand-600/30 transition-all active:scale-95 cursor-pointer shrink-0"
-          >
-            <ShoppingBag className="w-4 h-4" />
-            <span>My Orders</span>
-          </Link>
+          <div className="flex items-center gap-2 shrink-0">
+            <Link
+              to="/my-orders?action=refund"
+              id="profile-request-refund-btn"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-2xl bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 font-bold text-xs border border-red-500/20 shadow-sm transition-all active:scale-95 cursor-pointer"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Request Refund</span>
+            </Link>
+
+            <Link
+              to="/my-orders"
+              id="profile-my-orders-btn"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-brand-600 hover:bg-brand-500 text-white font-bold text-xs shadow-md shadow-brand-600/30 transition-all active:scale-95 cursor-pointer"
+            >
+              <ShoppingBag className="w-4 h-4" />
+              <span>My Orders</span>
+            </Link>
+          </div>
         </div>
 
         {/* 2-Column Grid for Profile Details (Clean, balanced, non-vertical) */}

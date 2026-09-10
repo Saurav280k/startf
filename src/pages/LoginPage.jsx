@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { Mail, Lock, ArrowRight, ShieldCheck } from 'lucide-react';
 import { api } from '../api/client';
@@ -9,6 +9,8 @@ import GoogleAuthButton from '../components/auth/GoogleAuthButton';
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirect = searchParams.get('redirect') || '/';
   const { setAuth } = useAuthStore();
   const { addToast } = useToastStore();
 
@@ -24,7 +26,7 @@ const LoginPage = () => {
         message: `Welcome back, ${res.user.username}!`,
         type: 'success',
       });
-      navigate('/');
+      navigate(redirect, { replace: true });
     },
     onError: (err) => {
       addToast({
@@ -70,7 +72,7 @@ const LoginPage = () => {
 
         {/* Google One-Click Auth */}
         <div className="space-y-4">
-          <GoogleAuthButton mode="signin" />
+          <GoogleAuthButton mode="signin" redirect={redirect} />
 
           <div className="flex items-center gap-3">
             <div className="flex-1 h-px bg-slate-200 dark:bg-white/10" />
@@ -144,7 +146,10 @@ const LoginPage = () => {
         {/* Footer */}
         <div className="text-center pt-4 border-t border-slate-100 dark:border-white/5 text-xs text-slate-500">
           Don't have an account yet?{' '}
-          <Link to="/signup" className="font-bold text-brand-600 hover:underline">
+          <Link
+            to={redirect !== '/' ? `/signup?redirect=${encodeURIComponent(redirect)}` : '/signup'}
+            className="font-bold text-brand-600 hover:underline"
+          >
             Create an Account
           </Link>
         </div>

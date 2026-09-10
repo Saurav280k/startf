@@ -283,7 +283,7 @@ const HomePage = () => {
               Engineering Excellence
             </div>
             <h2 className="text-2xl sm:text-3xl font-black font-display text-slate-950 dark:text-white">
-              Bespoke Digital Services & Growth
+              Digital Services & Growth
             </h2>
           </div>
           <Link
@@ -399,10 +399,10 @@ const HomePage = () => {
               01
             </div>
             <h4 className="text-base font-bold text-slate-900 dark:text-white">
-              Scan UPI & Submit 12-Digit UTR
+              Scan & Pay
             </h4>
             <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-              Scan the UPI QR code with any app (GPay, PhonePe, Paytm), enter the 12-digit transaction ID, and confirm payment.
+              Scan the UPI QR code with any app (GPay, PhonePe, Paytm), enter the transaction ID, and confirm payment.
             </p>
           </div>
 

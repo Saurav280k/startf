@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate, Link } from 'react-router-dom';
+import { useSearchParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
+import QRCode from 'react-qr-code';
 import {
   ShieldCheck,
   Lock,
@@ -16,6 +17,8 @@ import {
   X,
   Loader2,
   AlertTriangle,
+  ExternalLink,
+  Smartphone,
 } from 'lucide-react';
 import { api } from '../api/client';
 import { useAuthStore } from '../store/useAuthStore';
@@ -28,12 +31,31 @@ import { useCartStore } from '../store/useCartStore';
 const CheckoutPage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { user } = useAuthStore();
+  const location = useLocation();
+  const { user, isAuthenticated } = useAuthStore();
   const { addToast } = useToastStore();
   const { openConfirmation } = useModalStore();
   const checkoutStore = useCheckoutStore();
   const { currency, formatAmount } = useCurrencyStore();
   const { items: cartItems, clearCart, getTotal: getCartTotal } = useCartStore();
+
+  const ADMIN_UPI =
+    import.meta.env.ADMIN_UPI ||
+    import.meta.env.VITE_ADMIN_UPI ||
+    'gauravpushpa28@okaxis';
+
+  // Require user to be logged in/signed up to complete purchase
+  useEffect(() => {
+    if (!isAuthenticated) {
+      addToast({
+        message: 'Please sign in or create an account to complete your purchase.',
+        type: 'info',
+      });
+      navigate(`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`, {
+        replace: true,
+      });
+    }
+  }, [isAuthenticated, location.pathname, location.search, navigate, addToast]);
 
   const rawItemType = searchParams.get('type');
   const itemId = searchParams.get('id');
@@ -60,8 +82,6 @@ const CheckoutPage = () => {
 
   // Floating Order Items Drawer state
   const [isItemsDrawerOpen, setIsItemsDrawerOpen] = useState(false);
-
-  const UPI_ID = 'gauravpushpa28@okaxis';
 
   // Fetch single item details if not a multi-item cart
   const { data: accountData, isLoading: accountLoading } = useQuery({
@@ -168,9 +188,9 @@ const CheckoutPage = () => {
   };
 
   const copyUpiId = () => {
-    navigator.clipboard.writeText(UPI_ID);
+    navigator.clipboard.writeText(ADMIN_UPI);
     setCopiedUpi(true);
-    addToast({ message: 'UPI ID copied to clipboard!', type: 'success' });
+    addToast({ message: `UPI ID (${ADMIN_UPI}) copied to clipboard!`, type: 'success' });
     setTimeout(() => setCopiedUpi(false), 2500);
   };
 
@@ -312,9 +332,96 @@ const CheckoutPage = () => {
     );
   }
 
-  // Dynamic UPI URL for QR generation
-  const upiIntentString = `upi://pay?pa=${UPI_ID}&pn=ModernTeams&am=${amount}&cu=INR&tn=Order_${itemType}`;
-  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(upiIntentString)}`;
+  // Dynamic UPI URL for QR generation using ADMIN_UPI environment variable and exact amount
+  const upiAmount = Math.round(amount);
+  const upiIntentString = `upi://pay?pa=${encodeURIComponent(ADMIN_UPI)}&pn=${encodeURIComponent(
+    'Modern Teams'
+  )}&am=${upiAmount}&cu=INR&tn=${encodeURIComponent(`Order_${itemType}`)}`;
+
+  const upiApps = [
+    {
+      id: 'gpay',
+      name: 'Google Pay',
+      scheme: `tez://upi/pay?pa=${encodeURIComponent(ADMIN_UPI)}&pn=${encodeURIComponent(
+        'Modern Teams'
+      )}&am=${upiAmount}&cu=INR&tn=${encodeURIComponent('Modern Teams Order')}`,
+      badge: 'GPay',
+      borderClass: 'border-blue-500/30 hover:border-blue-500 bg-blue-500/5',
+      icon: (
+        <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" />
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" />
+        </svg>
+      ),
+    },
+    {
+      id: 'phonepe',
+      name: 'PhonePe',
+      scheme: `phonepe://pay?pa=${encodeURIComponent(ADMIN_UPI)}&pn=${encodeURIComponent(
+        'Modern Teams'
+      )}&am=${upiAmount}&cu=INR&tn=${encodeURIComponent('Modern Teams Order')}`,
+      badge: 'PhonePe',
+      borderClass: 'border-purple-500/30 hover:border-purple-500 bg-purple-500/5',
+      icon: (
+        <div className="w-5 h-5 rounded-full bg-[#5f259f] flex items-center justify-center text-white font-black text-[11px] shadow-sm shrink-0">
+          पे
+        </div>
+      ),
+    },
+    {
+      id: 'paytm',
+      name: 'Paytm UPI',
+      scheme: `paytmmp://pay?pa=${encodeURIComponent(ADMIN_UPI)}&pn=${encodeURIComponent(
+        'Modern Teams'
+      )}&am=${upiAmount}&cu=INR&tn=${encodeURIComponent('Modern Teams Order')}`,
+      badge: 'Paytm',
+      borderClass: 'border-sky-500/30 hover:border-sky-500 bg-sky-500/5',
+      icon: (
+        <div className="w-5 h-5 rounded-md bg-[#002970] flex items-center justify-center text-[#00baf2] font-black text-[9px] shadow-sm shrink-0">
+          Pay
+        </div>
+      ),
+    },
+    {
+      id: 'bhim',
+      name: 'BHIM UPI',
+      scheme: `bhim://pay?pa=${encodeURIComponent(ADMIN_UPI)}&pn=${encodeURIComponent(
+        'Modern Teams'
+      )}&am=${upiAmount}&cu=INR&tn=${encodeURIComponent('Modern Teams Order')}`,
+      badge: 'BHIM',
+      borderClass: 'border-orange-500/30 hover:border-orange-500 bg-orange-500/5',
+      icon: (
+        <div className="w-5 h-5 rounded-md bg-gradient-to-r from-orange-500 to-green-600 flex items-center justify-center text-white font-bold text-[8px] shadow-sm shrink-0">
+          BHIM
+        </div>
+      ),
+    },
+    {
+      id: 'any_upi',
+      name: 'CRED / Other',
+      scheme: `upi://pay?pa=${encodeURIComponent(ADMIN_UPI)}&pn=${encodeURIComponent(
+        'Modern Teams'
+      )}&am=${upiAmount}&cu=INR&tn=${encodeURIComponent('Modern Teams Order')}`,
+      badge: 'Any UPI',
+      borderClass: 'border-emerald-500/30 hover:border-emerald-500 bg-emerald-500/5',
+      icon: (
+        <div className="w-5 h-5 rounded-md bg-slate-900 dark:bg-obsidian-800 text-emerald-400 flex items-center justify-center font-black text-[10px] shadow-sm shrink-0">
+          UPI
+        </div>
+      ),
+    },
+  ];
+
+  const handleOpenUpiApp = (scheme, appName) => {
+    navigator.clipboard?.writeText(ADMIN_UPI);
+    addToast({
+      message: `Opening ${appName}... Pre-filled for ₹${upiAmount.toLocaleString('en-IN')}. If on PC, scan the QR code!`,
+      type: 'info',
+    });
+    window.location.href = scheme;
+  };
 
   return (
     <div className="relative min-h-[80vh] max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-6">
@@ -515,36 +622,41 @@ const CheckoutPage = () => {
             ) : (
               <>
                 {/* QR Code & UPI Details Card */}
-                <div className="p-5 rounded-2xl bg-slate-50 dark:bg-obsidian-950 border border-slate-200/80 dark:border-white/10 flex flex-col sm:flex-row items-center gap-6">
-                  {/* Dynamic QR Code */}
-                  <div className="w-40 h-40 rounded-2xl bg-white p-2.5 shadow-md border border-slate-200 shrink-0 flex items-center justify-center">
-                    <img src={qrCodeUrl} alt="UPI QR" className="w-full h-full object-contain" />
+                <div className="p-5 sm:p-6 rounded-3xl bg-slate-50 dark:bg-obsidian-950 border border-slate-200/80 dark:border-white/10 flex flex-col sm:flex-row items-center gap-6">
+                  {/* Dynamic Pure SVG QR Code */}
+                  <div className="w-44 h-44 rounded-2xl bg-white p-3 shadow-md border border-slate-200 shrink-0 flex items-center justify-center">
+                    <QRCode
+                      value={upiIntentString}
+                      size={160}
+                      style={{ height: 'auto', maxWidth: '100%', width: '100%' }}
+                      viewBox="0 0 160 160"
+                    />
                   </div>
 
                   {/* UPI Details & Copy */}
                   <div className="space-y-3 flex-1 text-center sm:text-left min-w-0">
                     <div>
                       <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Amount to Pay</span>
-                      <div className="text-xl sm:text-2xl font-black font-display text-slate-900 dark:text-white">
+                      <div className="text-2xl sm:text-3xl font-black font-display text-slate-900 dark:text-white">
                         {formatAmount(amount)}
                       </div>
                       {currency === 'USD' && (
                         <span className="text-[11px] text-slate-400 font-mono">
-                          (UPI INR equivalent: ₹{amount.toLocaleString('en-IN')})
+                          (UPI INR equivalent: ₹{upiAmount.toLocaleString('en-IN')})
                         </span>
                       )}
                     </div>
 
                     <div className="space-y-1">
-                      <span className="text-[11px] text-slate-400">UPI ID:</span>
+                      <span className="text-[11px] text-slate-400">Admin UPI ID:</span>
                       <div className="flex items-center justify-center sm:justify-start gap-2">
                         <span className="font-mono text-xs font-bold text-slate-900 dark:text-white bg-white dark:bg-obsidian-850 px-3 py-1.5 rounded-xl border border-slate-200/80 dark:border-white/10 select-all">
-                          {UPI_ID}
+                          {ADMIN_UPI}
                         </span>
                         <button
                           type="button"
                           onClick={copyUpiId}
-                          className="p-1.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white transition-colors cursor-pointer"
+                          className="p-1.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white transition-colors cursor-pointer active:scale-95"
                           title="Copy UPI ID"
                         >
                           {copiedUpi ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
@@ -552,9 +664,37 @@ const CheckoutPage = () => {
                       </div>
                     </div>
 
-                    <div className="text-[11px] text-slate-400">
-                      Supported: <span className="font-semibold text-slate-700 dark:text-slate-300">GPay, PhonePe, Paytm, CRED</span>
+                    <div className="flex items-center justify-center sm:justify-start gap-1.5 text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">
+                      <Smartphone className="w-3.5 h-3.5" />
+                      <span>Scan with any UPI App or tap buttons below</span>
                     </div>
+                  </div>
+                </div>
+
+                {/* 1-Click UPI Apps Section */}
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                      <Smartphone className="w-4 h-4 text-brand-500" />
+                      <span>Click to Pay Directly via UPI App:</span>
+                    </span>
+                    <span className="text-[11px] text-slate-400 font-mono">Auto-fills ₹{upiAmount.toLocaleString('en-IN')}</span>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+                    {upiApps.map((app) => (
+                      <button
+                        key={app.id}
+                        type="button"
+                        id={`upi-app-btn-${app.id}`}
+                        onClick={() => handleOpenUpiApp(app.scheme, app.name)}
+                        className={`p-3 rounded-2xl border transition-all duration-200 flex flex-col items-center justify-center gap-1.5 shadow-sm hover:shadow-md cursor-pointer active:scale-95 text-slate-800 dark:text-slate-100 ${app.borderClass}`}
+                      >
+                        {app.icon}
+                        <span className="text-xs font-bold truncate">{app.badge}</span>
+                        <span className="text-[9px] text-slate-400 font-medium">1-Click Pay</span>
+                      </button>
+                    ))}
                   </div>
                 </div>
 

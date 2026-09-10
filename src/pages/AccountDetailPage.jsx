@@ -27,7 +27,7 @@ import { useCartStore } from '../store/useCartStore';
 const AccountDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuthStore();
+  const { user, isAuthenticated } = useAuthStore();
   const { addToast } = useToastStore();
   const { formatAmount } = useCurrencyStore();
   const { addItem } = useCartStore();
@@ -62,9 +62,16 @@ const AccountDetailPage = () => {
     }
 
     setEmailError('');
-    navigate(
-      `/checkout?type=account&id=${account._id}&transferEmail=${encodeURIComponent(transferEmail)}`
-    );
+    const checkoutPath = `/checkout?type=account&id=${account._id}&transferEmail=${encodeURIComponent(transferEmail)}`;
+    if (!isAuthenticated) {
+      addToast({
+        message: 'Please sign in or create an account to purchase this account.',
+        type: 'info',
+      });
+      navigate(`/login?redirect=${encodeURIComponent(checkoutPath)}`);
+      return;
+    }
+    navigate(checkoutPath);
   };
 
   const handleAddToCart = () => {

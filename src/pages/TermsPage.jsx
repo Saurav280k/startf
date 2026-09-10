@@ -6,20 +6,20 @@ const TermsPage = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
       <button
         onClick={() => navigate(-1)}
-        className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
+        className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
       >
         <ArrowLeft className="w-4 h-4" />
         <span>Back</span>
       </button>
 
-      <div className="space-y-3">
-        <span className="text-xs font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400 bg-brand-500/10 px-3 py-1 rounded-full">
+      <div className="space-y-2">
+        <span className="text-xs font-bold uppercase tracking-wider text-brand-600 dark:text-brand-400 bg-brand-500/10 px-3 py-1 rounded-full inline-block border border-brand-500/20">
           Rules & Safety
         </span>
-        <h1 className="text-3xl sm:text-4xl font-black font-display text-slate-900 dark:text-white">
+        <h1 className="text-2xl sm:text-3xl font-black font-display text-slate-900 dark:text-white">
           Terms of Service & Buyer Rules
         </h1>
         <p className="text-xs text-slate-500">Last updated: September 2026</p>

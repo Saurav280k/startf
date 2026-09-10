@@ -14,9 +14,11 @@ import {
 import { useCartStore } from '../store/useCartStore';
 import { useCurrencyStore } from '../store/useCurrencyStore';
 import { useToastStore } from '../store/useToastStore';
+import { useAuthStore } from '../store/useAuthStore';
 
 const CartPage = () => {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuthStore();
   const { items, removeItem, clearCart, getTotal } = useCartStore();
   const { formatAmount } = useCurrencyStore();
   const { addToast } = useToastStore();
@@ -34,6 +36,14 @@ const CartPage = () => {
   const handleCheckout = () => {
     if (items.length === 0) {
       addToast({ message: 'Your cart is empty', type: 'error' });
+      return;
+    }
+    if (!isAuthenticated) {
+      addToast({
+        message: 'Please sign in or create an account to proceed to checkout.',
+        type: 'info',
+      });
+      navigate('/login?redirect=/checkout');
       return;
     }
     navigate('/checkout');
@@ -205,13 +215,15 @@ const CartPage = () => {
                 </div>
               </div>
 
-              <Link
-                to="/checkout"
+              <button
+                type="button"
+                onClick={handleCheckout}
+                id="cart-checkout-proceed-btn"
                 className="w-full py-4 px-6 rounded-2xl bg-brand-600 hover:bg-brand-500 active:scale-[0.99] text-white font-bold text-sm transition-all shadow-xl shadow-brand-600/30 flex items-center justify-center gap-2 cursor-pointer"
               >
                 <Lock className="w-4 h-4" />
                 <span>Proceed to Checkout ({formatAmount(totalAmount)})</span>
-              </Link>
+              </button>
 
               {/* Safety Badge Box */}
               <div className="p-4 rounded-2xl bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-500/20 space-y-1.5 text-xs">
@@ -240,14 +252,15 @@ const CartPage = () => {
             </span>
           </div>
 
-          <Link
-            to="/checkout"
+          <button
+            type="button"
+            onClick={handleCheckout}
             id="cart-sticky-pay-now-btn"
             className="flex items-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl sm:rounded-full bg-brand-600 hover:bg-brand-500 active:scale-95 text-white font-bold text-xs sm:text-sm transition-all shadow-lg shadow-brand-600/40 cursor-pointer shrink-0"
           >
             <span>Pay Now</span>
             <ArrowRight className="w-4 h-4" />
-          </Link>
+          </button>
         </div>
       )}
     </div>

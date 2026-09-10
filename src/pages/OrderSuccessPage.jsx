@@ -17,6 +17,7 @@ import {
   Check,
   FileText,
   HelpCircle,
+  RotateCcw,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { api } from '../api/client';
@@ -508,10 +509,12 @@ const OrderSuccessPage = () => {
           {(!order.refund || order.refund.status === 'rejected') && (
             <button
               type="button"
+              id="order-tracker-request-refund-btn"
               onClick={() => setIsRefundModalOpen(true)}
-              className="px-4 py-2.5 rounded-2xl border border-red-500/30 hover:bg-red-500/10 text-red-600 dark:text-red-400 font-bold text-xs transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-2xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs shadow-md shadow-red-600/25 transition-all active:scale-95 cursor-pointer"
             >
-              Request Refund
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Request Refund</span>
             </button>
           )}
 

@@ -33,6 +33,7 @@ import {
   Globe,
   Code,
   Layers,
+  RotateCcw,
 } from 'lucide-react';
 import { api } from '../api/client';
 import { useAuthStore } from '../store/useAuthStore';
@@ -52,12 +53,14 @@ const AdminPage = () => {
   const { addToast } = useToastStore();
   const { formatAmount } = useCurrencyStore();
 
-  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'orders' | 'products' | 'internships'
+  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'orders' | 'refunds' | 'products' | 'internships'
   const [productsSubtab, setProductsSubtab] = useState('accounts'); // 'accounts' | 'services'
   const [internshipsSubtab, setInternshipsSubtab] = useState('applications'); // 'applications' | 'positions'
 
   const [orderFilter, setOrderFilter] = useState('All');
   const [orderSearch, setOrderSearch] = useState('');
+  const [refundFilter, setRefundFilter] = useState('All'); // 'All' | 'Pending' | 'Approved' | 'Declined'
+  const [refundNotesMap, setRefundNotesMap] = useState({});
   const [copiedUtr, setCopiedUtr] = useState(null);
 
   // Login form state
@@ -167,6 +170,13 @@ const AdminPage = () => {
     queryKey: ['admin-orders', orderFilter, orderSearch],
     queryFn: () => api.getAllOrders({ status: orderFilter, search: orderSearch }),
     enabled: isAdmin,
+  });
+
+  const { data: refundsData, isLoading: refundsLoading, refetch: refetchRefunds } = useQuery({
+    queryKey: ['admin-refunds'],
+    queryFn: () => api.getAllOrders({ status: 'Refunds' }),
+    enabled: isAdmin,
+    refetchInterval: 4000,
   });
 
   const { data: accountsData, isLoading: accountsLoading, refetch: refetchAccounts } = useQuery({
@@ -381,7 +391,9 @@ const AdminPage = () => {
     onSuccess: (data) => {
       addToast({ message: data.message || 'Refund status updated!', type: 'success' });
       queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-refunds'] });
       queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-accounts'] });
     },
     onError: (err) => {
       addToast({ message: err.message || 'Failed to update refund status', type: 'error' });
@@ -606,6 +618,8 @@ const AdminPage = () => {
   const services = servicesData?.services || [];
   const internships = internshipsData?.internships || [];
   const applications = applicationsData?.applications || [];
+  const refundOrders = refundsData?.orders || [];
+  const pendingRefundsCount = refundOrders.filter((o) => o.refund?.status === 'requested').length;
 
   return (
     <div className="min-h-screen bg-slate-50/50 dark:bg-obsidian-950 pb-24">
@@ -661,6 +675,24 @@ const AdminPage = () => {
               {stats.pendingOrders > 0 && (
                 <span className="w-5 h-5 rounded-full bg-amber-500 text-white text-[10px] font-black flex items-center justify-center animate-pulse">
                   {stats.pendingOrders}
+                </span>
+              )}
+            </button>
+            <button
+              type="button"
+              id="admin-tab-refunds"
+              onClick={() => setActiveTab('refunds')}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                activeTab === 'refunds'
+                  ? 'bg-white dark:bg-obsidian-900 text-brand-600 dark:text-brand-400 shadow-sm'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+              }`}
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Refund Requests</span>
+              {pendingRefundsCount > 0 && (
+                <span className="w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-black flex items-center justify-center animate-pulse">
+                  {pendingRefundsCount}
                 </span>
               )}
             </button>
@@ -725,7 +757,7 @@ const AdminPage = () => {
         {activeTab === 'overview' && (
           <div className="space-y-8 animate-in fade-in duration-300">
             {/* Top KPI Cards Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
               {/* Total Revenue */}
               <div className="p-6 rounded-3xl bg-white dark:bg-obsidian-900 border border-slate-200/80 dark:border-white/10 shadow-sm space-y-2">
                 <div className="flex items-center justify-between">
@@ -760,6 +792,34 @@ const AdminPage = () => {
                   {stats.pendingOrders}
                 </div>
                 <p className="text-[11px] text-slate-500">Requires UTR verification & approval</p>
+              </div>
+
+              {/* Refund Requests KPI Tile */}
+              <div
+                onClick={() => setActiveTab('refunds')}
+                className={`p-6 rounded-3xl bg-white dark:bg-obsidian-900 border shadow-sm space-y-2 cursor-pointer transition-all hover:scale-[1.02] ${
+                  pendingRefundsCount > 0
+                    ? 'border-red-500/50 hover:border-red-500 ring-1 ring-red-500/20'
+                    : 'border-slate-200/80 dark:border-white/10 hover:border-red-500/50'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-red-500 uppercase tracking-wider flex items-center gap-1.5">
+                    {pendingRefundsCount > 0 && (
+                      <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
+                    )}
+                    <span>Refund Claims</span>
+                  </span>
+                  <div className="w-8 h-8 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center font-bold">
+                    <RotateCcw className="w-4 h-4" />
+                  </div>
+                </div>
+                <div className="text-2xl sm:text-3xl font-black font-display text-red-500">
+                  {pendingRefundsCount}
+                </div>
+                <p className="text-[11px] text-slate-500">
+                  {refundOrders.length} total claims • Click to review
+                </p>
               </div>
 
               {/* Total Orders */}
@@ -1254,6 +1314,324 @@ const AdminPage = () => {
                     </div>
                   </div>
                 ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ============================================================== */}
+        {/* TAB: REFUND CLAIMS & RESOLUTION */}
+        {/* ============================================================== */}
+        {activeTab === 'refunds' && (
+          <div className="space-y-6 animate-in fade-in duration-300">
+            {/* Header & Mini KPIs */}
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-black font-display text-slate-900 dark:text-white flex items-center gap-2.5">
+                  <RotateCcw className="w-6 h-6 text-red-500" />
+                  <span>Buyer Refund Requests & Resolution</span>
+                </h2>
+                <p className="text-xs text-slate-500">
+                  Review buyer claims, verify receiving UPI IDs, and approve or decline refund payouts
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => refetchRefunds()}
+                  className="px-3 py-2 rounded-xl bg-slate-100 dark:bg-obsidian-850 hover:bg-slate-200 dark:hover:bg-obsidian-800 text-slate-700 dark:text-slate-300 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+                  title="Refresh claims"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${refundsLoading ? 'animate-spin' : ''}`} />
+                  <span>Refresh</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Refund Status Filter Pills */}
+            <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl bg-white dark:bg-obsidian-900 border border-slate-200/80 dark:border-white/10 shadow-sm">
+              <div className="flex items-center gap-2 overflow-x-auto max-w-full">
+                {[
+                  { label: 'All Requests', value: 'All', count: refundOrders.length },
+                  { label: 'Pending Review', value: 'Pending', count: refundOrders.filter((o) => o.refund?.status === 'requested').length },
+                  { label: 'Approved & Settled', value: 'Approved', count: refundOrders.filter((o) => o.refund?.status === 'approved').length },
+                  { label: 'Declined', value: 'Declined', count: refundOrders.filter((o) => o.refund?.status === 'rejected').length },
+                ].map((tab) => (
+                  <button
+                    key={tab.value}
+                    type="button"
+                    onClick={() => setRefundFilter(tab.value)}
+                    className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                      refundFilter === tab.value
+                        ? 'bg-red-600 text-white shadow-md shadow-red-600/25'
+                        : 'bg-slate-100 dark:bg-obsidian-850 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                    }`}
+                  >
+                    <span>{tab.label}</span>
+                    <span
+                      className={`text-[10px] px-1.5 py-0.2 rounded-full ${
+                        refundFilter === tab.value
+                          ? 'bg-white/20 text-white'
+                          : 'bg-slate-200 dark:bg-obsidian-750 text-slate-600 dark:text-slate-300'
+                      }`}
+                    >
+                      {tab.count}
+                    </span>
+                  </button>
+                ))}
+              </div>
+
+              <div className="text-xs text-slate-500">
+                Approving a refund automatically marks the order refunded and restores inventory.
+              </div>
+            </div>
+
+            {/* Refunds Listing */}
+            {refundsLoading ? (
+              <div className="p-12 text-center text-xs text-slate-400">Loading refund claims...</div>
+            ) : refundOrders.filter((ord) => {
+                if (refundFilter === 'Pending') return ord.refund?.status === 'requested';
+                if (refundFilter === 'Approved') return ord.refund?.status === 'approved';
+                if (refundFilter === 'Declined') return ord.refund?.status === 'rejected';
+                return true;
+              }).length === 0 ? (
+              <div className="rounded-3xl p-12 text-center bg-white dark:bg-obsidian-900 border border-slate-200/80 dark:border-white/10 text-slate-400 text-xs space-y-2">
+                <RotateCcw className="w-8 h-8 mx-auto text-slate-400 opacity-60" />
+                <p className="font-semibold text-slate-600 dark:text-slate-300">
+                  No refund requests matching "{refundFilter}" filter
+                </p>
+                <p className="text-[11px] text-slate-400">
+                  When buyers submit refund requests from their order history or order tracking page, they will show up here for review.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {refundOrders
+                  .filter((ord) => {
+                    if (refundFilter === 'Pending') return ord.refund?.status === 'requested';
+                    if (refundFilter === 'Approved') return ord.refund?.status === 'approved';
+                    if (refundFilter === 'Declined') return ord.refund?.status === 'rejected';
+                    return true;
+                  })
+                  .map((ord) => {
+                    const refundStatus = ord.refund?.status || 'requested';
+                    const buyerNotes = refundNotesMap[ord._id] ?? '';
+
+                    return (
+                      <div
+                        key={ord._id}
+                        className="p-6 rounded-3xl bg-white dark:bg-obsidian-900 border border-slate-200/80 dark:border-white/10 shadow-sm space-y-5"
+                      >
+                        {/* Header: Order Info & Status Badge */}
+                        <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-white/5">
+                          <div className="flex items-center gap-3">
+                            <span className="font-mono text-sm font-black text-brand-600 dark:text-brand-400">
+                              {ord.orderNumber}
+                            </span>
+                            <span className="text-[11px] text-slate-400">
+                              Order Placed: {new Date(ord.createdAt).toLocaleDateString()}
+                            </span>
+                            {ord.refund?.requestedAt && (
+                              <span className="text-[11px] text-red-500 font-semibold">
+                                Claim Submitted: {new Date(ord.refund.requestedAt).toLocaleString()}
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            {refundStatus === 'requested' && (
+                              <span className="text-xs font-bold px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center gap-1.5 animate-pulse">
+                                <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                                Action Required: Pending Review
+                              </span>
+                            )}
+                            {refundStatus === 'approved' && (
+                              <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 flex items-center gap-1.5">
+                                <CheckCircle2 className="w-3.5 h-3.5" />
+                                Refund Approved & Settled
+                              </span>
+                            )}
+                            {refundStatus === 'rejected' && (
+                              <span className="text-xs font-bold px-3 py-1 rounded-full bg-red-500/10 text-red-500 border border-red-500/20 flex items-center gap-1.5">
+                                <XCircle className="w-3.5 h-3.5" />
+                                Refund Request Declined
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Middle Content: 3-column layout */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                          {/* Col 1: Order & Asset Snapshot */}
+                          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-obsidian-850 border border-slate-200/60 dark:border-white/5 space-y-2.5">
+                            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                              Purchased Asset
+                            </div>
+                            <div className="font-bold text-sm text-slate-900 dark:text-white">
+                              {ord.itemSnapshot?.title || 'Marketplace Item'}
+                            </div>
+                            <div className="text-xs text-slate-500">
+                              Type: <span className="font-semibold text-slate-700 dark:text-slate-300">{ord.itemType}</span> • Platform: <span className="font-semibold text-slate-700 dark:text-slate-300">{ord.itemSnapshot?.platform || 'Digital Service'}</span>
+                            </div>
+                            <div className="pt-2 border-t border-slate-200/60 dark:border-white/5 flex items-center justify-between">
+                              <span className="text-xs text-slate-500">Order Amount:</span>
+                              <span className="text-base font-black font-display text-slate-900 dark:text-white">
+                                {formatAmount(ord.amount)}
+                              </span>
+                            </div>
+                            <div className="text-[11px] text-slate-400">
+                              Buyer: <span className="font-medium text-slate-600 dark:text-slate-300">{ord.buyerEmail}</span>
+                            </div>
+                            {ord.buyerPhone && (
+                              <div className="text-[11px] text-slate-400">
+                                Phone: <span className="font-medium text-slate-600 dark:text-slate-300">{ord.buyerPhone}</span>
+                              </div>
+                            )}
+                            <div className="text-[11px] text-slate-400 flex items-center justify-between">
+                              <span>Payment UTR:</span>
+                              <span className="font-mono font-bold text-slate-700 dark:text-slate-300">{ord.upiTransactionId}</span>
+                            </div>
+                          </div>
+
+                          {/* Col 2: Buyer Claim & Receiving UPI */}
+                          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-obsidian-850 border border-slate-200/60 dark:border-white/5 space-y-3">
+                            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                              Buyer Claim Details
+                            </div>
+                            <div>
+                              <div className="text-[11px] text-slate-400 mb-0.5">Reason for Refund:</div>
+                              <div className="px-2.5 py-1 rounded-lg bg-red-500/10 text-red-600 dark:text-red-400 text-xs font-bold inline-block">
+                                {ord.refund?.reason || 'Buyer requested refund'}
+                              </div>
+                            </div>
+                            {ord.refund?.notes && (
+                              <div>
+                                <div className="text-[11px] text-slate-400 mb-0.5">Buyer's Explanation:</div>
+                                <p className="text-xs text-slate-700 dark:text-slate-300 italic bg-white dark:bg-obsidian-900 p-2.5 rounded-xl border border-slate-200/60 dark:border-white/5">
+                                  "{ord.refund.notes}"
+                                </p>
+                              </div>
+                            )}
+
+                            {/* Receiving UPI ID Highlight Box */}
+                            <div className="p-3 rounded-xl bg-brand-500/10 dark:bg-brand-500/15 border border-brand-500/30 space-y-1.5">
+                              <div className="text-[11px] font-bold uppercase tracking-wider text-brand-700 dark:text-brand-300">
+                                Buyer's Receiving UPI ID
+                              </div>
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="font-mono text-xs sm:text-sm font-black text-brand-600 dark:text-brand-400 break-all select-all">
+                                  {ord.refund?.upiId || 'Not provided'}
+                                </span>
+                                {ord.refund?.upiId && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      navigator.clipboard.writeText(ord.refund.upiId);
+                                      addToast({ message: `Copied UPI ID: ${ord.refund.upiId}`, type: 'success' });
+                                    }}
+                                    className="p-1.5 rounded-lg bg-brand-600 text-white hover:bg-brand-500 text-[11px] font-bold flex items-center gap-1 cursor-pointer shrink-0"
+                                    title="Copy UPI ID"
+                                  >
+                                    <Copy className="w-3.5 h-3.5" />
+                                    <span>Copy</span>
+                                  </button>
+                                )}
+                              </div>
+                              <p className="text-[10px] text-slate-500 dark:text-slate-400">
+                                Send the payout of {formatAmount(ord.amount)} to this UPI handle.
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Col 3: Admin Review & Actions */}
+                          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-obsidian-850 border border-slate-200/60 dark:border-white/5 space-y-3 flex flex-col justify-between">
+                            <div className="space-y-2">
+                              <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                                Administrative Action
+                              </div>
+
+                              {refundStatus === 'requested' ? (
+                                <>
+                                  <label className="block text-[11px] font-medium text-slate-600 dark:text-slate-400">
+                                    Admin Note / Payout UTR:
+                                  </label>
+                                  <textarea
+                                    rows={2}
+                                    value={buyerNotes}
+                                    onChange={(e) =>
+                                      setRefundNotesMap((prev) => ({
+                                        ...prev,
+                                        [ord._id]: e.target.value,
+                                      }))
+                                    }
+                                    placeholder="Enter payout confirmation UTR or reason for decision..."
+                                    className="w-full px-3 py-2 rounded-xl bg-white dark:bg-obsidian-900 border border-slate-200/80 dark:border-white/10 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-red-500 shadow-sm"
+                                  />
+                                </>
+                              ) : (
+                                <div className="space-y-2 text-xs">
+                                  <div className="text-slate-500">
+                                    Processed On:{' '}
+                                    <span className="font-semibold text-slate-700 dark:text-slate-300">
+                                      {ord.refund?.processedAt
+                                        ? new Date(ord.refund.processedAt).toLocaleString()
+                                        : 'Recently'}
+                                    </span>
+                                  </div>
+                                  {ord.refund?.adminNotes && (
+                                    <div className="p-2.5 rounded-xl bg-white dark:bg-obsidian-900 border border-slate-200/60 dark:border-white/5 text-slate-700 dark:text-slate-300 text-[11px]">
+                                      <span className="font-bold">Admin Note:</span> {ord.refund.adminNotes}
+                                    </div>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Action Buttons for Pending */}
+                            {refundStatus === 'requested' ? (
+                              <div className="flex flex-col gap-2 pt-2 border-t border-slate-200/60 dark:border-white/5">
+                                <button
+                                  type="button"
+                                  disabled={updateRefundMutation.isPending}
+                                  onClick={() =>
+                                    updateRefundMutation.mutate({
+                                      id: ord._id,
+                                      status: 'approved',
+                                      adminNotes: buyerNotes || `Refund of ₹${ord.amount} approved and transferred to ${ord.refund?.upiId}.`,
+                                    })
+                                  }
+                                  className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold text-xs shadow-md shadow-emerald-600/20 transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                                >
+                                  <CheckCircle2 className="w-4 h-4" />
+                                  <span>Approve & Mark Refunded</span>
+                                </button>
+                                <button
+                                  type="button"
+                                  disabled={updateRefundMutation.isPending}
+                                  onClick={() =>
+                                    updateRefundMutation.mutate({
+                                      id: ord._id,
+                                      status: 'rejected',
+                                      adminNotes: buyerNotes || 'Refund claim declined after review.',
+                                    })
+                                  }
+                                  className="w-full py-2 px-4 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 font-bold text-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                                >
+                                  <XCircle className="w-4 h-4" />
+                                  <span>Decline Refund Claim</span>
+                                </button>
+                              </div>
+                            ) : (
+                              <div className="text-center py-2 text-[11px] font-bold text-slate-400 bg-slate-100 dark:bg-obsidian-800 rounded-xl">
+                                Resolution Finalized
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
               </div>
             )}
           </div>

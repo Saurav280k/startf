@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { User, Mail, Lock, Phone, ArrowRight, ShieldCheck, Check } from 'lucide-react';
 import { api } from '../api/client';
@@ -9,6 +9,8 @@ import GoogleAuthButton from '../components/auth/GoogleAuthButton';
 
 const SignupPage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirect = searchParams.get('redirect') || '/';
   const { setAuth } = useAuthStore();
   const { addToast } = useToastStore();
 
@@ -26,7 +28,7 @@ const SignupPage = () => {
         message: `Welcome to Modern Teams, ${res.user.username}!`,
         type: 'success',
       });
-      navigate('/');
+      navigate(redirect, { replace: true });
     },
     onError: (err) => {
       addToast({
@@ -87,7 +89,7 @@ const SignupPage = () => {
 
         {/* Google One-Click Sign Up */}
         <div className="space-y-4">
-          <GoogleAuthButton mode="signup" />
+          <GoogleAuthButton mode="signup" redirect={redirect} />
 
           <div className="flex items-center gap-3">
             <div className="flex-1 h-px bg-slate-200 dark:bg-white/10" />
@@ -226,7 +228,10 @@ const SignupPage = () => {
         {/* Footer */}
         <div className="text-center pt-4 border-t border-slate-100 dark:border-white/5 text-xs text-slate-500">
           Already registered?{' '}
-          <Link to="/login" className="font-bold text-brand-600 hover:underline">
+          <Link
+            to={redirect !== '/' ? `/login?redirect=${encodeURIComponent(redirect)}` : '/login'}
+            className="font-bold text-brand-600 hover:underline"
+          >
             Sign In here
           </Link>
         </div>
